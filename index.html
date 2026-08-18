@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cogu City - Cafeteria</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Painel de Informações (Moedas e Pontos) -->
+    <header id="placar">
+        <div class="moedas">Moedas: <span id="qtd-moedas">0</span> 🪙</div>
+        <button id="btn-pause">Pausar</button>
+    </header>
+
+    <!-- Área Principal do Jogo (O Balcão) -->
+    <main id="cenario">
+        
+        <!-- Onde o cliente (Musguinho, Cerejinha, etc) vai aparecer -->
+        <div id="area-cliente">
+            <img id="sprite-cliente" src="" alt="Cliente Atual">
+            <div id="balao-pedido">
+                <p id="texto-pedido">Aguardando cliente...</p>
+            </div>
+        </div>
+
+        <!-- Onde a comida/pedido é preparado ou entregue -->
+        <div id="balcao">
+            <button class="btn-item" onclick="entregarPedido('Chá')">☕ Chá</button>
+            <button class="btn-item" onclick="entregarPedido('Bolo')">🍰 Bolo</button>
+        </div>
+
+    </main>
+
+    <!-- Modal da Lojinha (Pode começar escondido no CSS) -->
+    <section id="lojinha" class="escondido">
+        <h2>Lojinha de Melhorias</h2>
+        <!-- Itens de compra entram aqui -->
+    </section>
+
+    <!-- Conexão com a Lógica do Jogo -->
+    <script src="script.js"></script>
+</body>
+</html>
