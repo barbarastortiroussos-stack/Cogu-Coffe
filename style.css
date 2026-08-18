@@ -43,7 +43,7 @@ body {
 #cenario {
     width: 800px;
     height: 500px;
-    background-image: url('assets/cafe-bg.jpg'); /* Sua imagem do cenário aqui */
+    background-image: url('cafe-bg.jpg'); /* Removido o 'assets/' daqui */
     background-size: cover;
     background-position: center;
     position: relative;
