@@ -104,16 +104,25 @@ btnPause.addEventListener('click', () => {
     btnPause.innerText = jogoPausado ? "Continuar" : "Pausar";
 });
 
-// Liga o loop da música no primeiro clique do usuário
-window.addEventListener('click', () => {
-    if (musica && musica.paused) {
-        musica.volume = 0.25; // Volume ambiente agradável a 25%
-        musica.play();
-    }
-}, { once: true });
+// Referência da música de fundo
+const musica = document.getElementById('musica-fundo');
 
-// Inicia o primeiro cliente assim que a página carrega
-window.onload = () => {
-    novoCliente();
-};
+function iniciarMusica() {
+    if (musica) {
+        musica.volume = 0.25; // Volume a 25%
+        
+        // Garante que a música volte ao início e toque de novo quando terminar
+        musica.onended = () => {
+            musica.currentTime = 0;
+            musica.play();
+        };
+
+        musica.play().catch(erro => {
+            console.log("Aguardando interação para tocar o som:", erro);
+        });
+    }
+}
+
+// Inicia a música assim que o jogador clicar em QUALQUER lugar do jogo
+document.addEventListener('click', iniciarMusica, { once: true });
 
