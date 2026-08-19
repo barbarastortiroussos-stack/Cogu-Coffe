@@ -14,7 +14,7 @@ const clientes = [
         nome: "Musguinho", 
         pedidosPossiveis: ["Chá", "Bolo"], 
         recompensa: 10,
-        foto: "customer-2.png" // Nome exato do arquivo de imagem do cliente
+        foto: "customer-2.png"
     },
     { 
         nome: "Cerejinha", 
@@ -23,12 +23,14 @@ const clientes = [
         foto: "customer-1.png" 
     }
 ];
+
 // ==========================================
 // 2. REFERÊNCIAS DO HTML (DOM)
 // ==========================================
 const qtdMoedasElement = document.getElementById('qtd-moedas');
 const textoPedidoElement = document.getElementById('texto-pedido');
 const btnPause = document.getElementById('btn-pause');
+const musica = document.getElementById('musica-fundo'); // Movido para cá!
 
 // ==========================================
 // 3. FUNÇÕES DO JOGO
@@ -53,6 +55,7 @@ function novoCliente() {
     clienteAtual.pedido = pedidoSorteado;
     textoPedidoElement.innerText = `${clienteAtual.nome}: Quero um(a) ${clienteAtual.pedido}!`;
 }
+
 // Função para Comprar Melhoria na Lojinha
 function comprarUpgrade() {
     if (moedas >= precoUpgrade) {
@@ -91,13 +94,26 @@ function entregarPedido(item) {
     }
 }
 
+// ==========================================
+// 4. EVENTOS E INICIALIZAÇÃO
+// ==========================================
+
 // Botão de Pause
 btnPause.addEventListener('click', () => {
     jogoPausado = !jogoPausado;
     btnPause.innerText = jogoPausado ? "Continuar" : "Pausar";
 });
 
+// Liga o loop da música no primeiro clique do usuário
+window.addEventListener('click', () => {
+    if (musica && musica.paused) {
+        musica.volume = 0.25; // Volume ambiente agradável a 25%
+        musica.play();
+    }
+}, { once: true });
+
 // Inicia o primeiro cliente assim que a página carrega
 window.onload = () => {
     novoCliente();
 };
+
