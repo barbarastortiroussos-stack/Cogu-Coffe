@@ -43,7 +43,7 @@ body {
 #cenario {
     width: 800px;
     height: 500px;
-    background-image: url('cafe-bg.jpg'); /* Removido o 'assets/' daqui */
+    background-image: url('cafe-bg.jpg');
     background-size: cover;
     background-position: center;
     position: relative;
@@ -52,7 +52,6 @@ body {
     overflow: hidden;
 }
 
-/* Área do cliente e balão de fala */
 /* Área do cliente posicionada certinho no balcão */
 #area-cliente {
     position: absolute;
@@ -107,9 +106,9 @@ body {
 }
 
 .btn-item:hover {
-    transform: scale(1.05)
+    transform: scale(1.05);
+}
 
-/* Modal da Lojinha escondido por padrão */
 /* Container da Lojinha de Melhorias */
 #lojinha {
     width: 800px;
