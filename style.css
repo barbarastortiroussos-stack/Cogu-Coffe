@@ -53,28 +53,36 @@ body {
 }
 
 /* Área do cliente e balão de fala */
+/* Área do cliente posicionada certinho no balcão */
 #area-cliente {
     position: absolute;
-    top: 120px;
-    left: 320px;
+    bottom: 90px; /* Ajusta a altura para eles ficarem 'pisando' atrás do balcão */
+    left: 50%;
+    transform: translateX(-50%); /* Centraliza horizontalmente no cenário */
     display: flex;
     flex-direction: column;
     align-items: center;
+    z-index: 2;
 }
 
+/* Tamanho do personagem */
 #sprite-cliente {
-    width: 120px;
+    width: 220px; /* Aumentado para eles não ficarem pequenininhos */
     height: auto;
+    object-fit: contain;
 }
 
+/* Balão de fala bonitinho acima da cabeça */
 #balao-pedido {
-    background-color: white;
-    padding: 8px 14px;
-    border-radius: 15px;
-    border: 2px solid #333;
-    margin-bottom: 8px;
-    font-size: 14px;
+    background-color: #ffffff;
+    color: #333;
+    padding: 10px 18px;
+    border-radius: 18px;
+    border: 3px solid #5a4338;
+    margin-bottom: 12px;
+    font-size: 15px;
     font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
 /* Balcão com botões de itens */
@@ -99,10 +107,33 @@ body {
 }
 
 .btn-item:hover {
-    transform: scale(1.05);
-}
+    transform: scale(1.05)
 
 /* Modal da Lojinha escondido por padrão */
-.escondido {
-    display: none;
+/* Container da Lojinha de Melhorias */
+#lojinha {
+    width: 800px;
+    background-color: #3a2e2b;
+    color: #fff;
+    padding: 20px;
+    margin-top: 15px;
+    border-radius: 12px;
+    border: 3px solid #5a4338;
+    text-align: center;
+}
+
+#lojinha h2 {
+    font-size: 20px;
+    color: #f4a261;
+    margin-bottom: 12px;
+}
+
+#lojinha .btn-item {
+    background-color: #2a9d8f;
+    border-color: #264653;
+    color: white;
+}
+
+#lojinha .btn-item:hover {
+    background-color: #21867a;
 }
