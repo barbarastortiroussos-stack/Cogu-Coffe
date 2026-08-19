@@ -10,10 +10,19 @@ let precoUpgrade = 50;
 
 // Lista de Clientes da Vila Cogumelo
 const clientes = [
-    { nome: "Musguinho", pedidosPossiveis: ["Chá", "Bolo"], recompensa: 10 },
-    { nome: "Cerejinha", pedidosPossiveis: ["Café", "Torta", "Bolo"], recompensa: 15 }
+    { 
+        nome: "Musguinho", 
+        pedidosPossiveis: ["Chá", "Bolo"], 
+        recompensa: 10,
+        foto: "customer-2.png" // Nome exato do arquivo de imagem do cliente
+    },
+    { 
+        nome: "Cerejinha", 
+        pedidosPossiveis: ["Café", "Torta", "Bolo"], 
+        recompensa: 15,
+        foto: "customer-1.png" 
+    }
 ];
-
 // ==========================================
 // 2. REFERÊNCIAS DO HTML (DOM)
 // ==========================================
@@ -29,18 +38,21 @@ const btnPause = document.getElementById('btn-pause');
 function novoCliente() {
     if (jogoPausado) return;
 
-    // Sorteia o cliente
     const indiceCliente = Math.floor(Math.random() * clientes.length);
     clienteAtual = clientes[indiceCliente];
 
-    // Sorteia o pedido dentro das opções desse cliente
+    // Atualiza a imagem do cliente na tela
+    const spriteCliente = document.getElementById('sprite-cliente');
+    if (spriteCliente && clienteAtual.foto) {
+        spriteCliente.src = clienteAtual.foto;
+    }
+
     const opcoes = clienteAtual.pedidosPossiveis;
     const pedidoSorteado = opcoes[Math.floor(Math.random() * opcoes.length)];
 
-    clienteAtual.pedido = pedidoSorteado; // Define o pedido da rodada
+    clienteAtual.pedido = pedidoSorteado;
     textoPedidoElement.innerText = `${clienteAtual.nome}: Quero um(a) ${clienteAtual.pedido}!`;
 }
-
 // Função para Comprar Melhoria na Lojinha
 function comprarUpgrade() {
     if (moedas >= precoUpgrade) {
