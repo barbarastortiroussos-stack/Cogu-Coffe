@@ -17,7 +17,7 @@
     <!-- Área Principal do Jogo (O Balcão) -->
     <main id="cenario">
         
-        <!-- Onde o cliente (Musguinho, Cerejinha, etc) vai aparecer -->
+        <!-- Onde o cliente vai aparecer -->
         <div id="area-cliente">
             <img id="sprite-cliente" src="" alt="Cliente Atual">
             <div id="balao-pedido">
@@ -25,21 +25,23 @@
             </div>
         </div>
 
-        <!-- Onde a comida/pedido é preparado ou entregue -->
+        <!-- Balcão de Pratos -->
         <div id="balcao">
             <button class="btn-item" onclick="entregarPedido('Chá')">☕ Chá</button>
             <button class="btn-item" onclick="entregarPedido('Bolo')">🍰 Bolo</button>
+            <button class="btn-item" onclick="entregarPedido('Café')">☕ Café</button>
+            <button class="btn-item" onclick="entregarPedido('Torta')">🥧 Torta</button>
         </div>
 
     </main>
 
-    <!-- Modal da Lojinha (Pode começar escondido no CSS) -->
-    <section id="lojinha" class="escondido">
+    <!-- Lojinha de Melhorias -->
+    <section id="lojinha">
         <h2>Lojinha de Melhorias</h2>
-        <!-- Itens de compra entram aqui -->
+        <button class="btn-item" onclick="comprarUpgrade()">Melhorar Cafeteira (Upgrade)</button>
     </section>
 
-    <!-- Conexão com a Lógica do Jogo -->
+    <!-- Conexão com a Lógica do Jogo (Sempre no final do body) -->
     <script src="script.js"></script>
 </body>
 </html>
