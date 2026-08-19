@@ -1,4 +1,6 @@
-// Estado do Jogo (Variáveis Principais)
+// ==========================================
+// 1. ESTADO DO JOGO (VARIÁVEIS PRINCIPAIS)
+// ==========================================
 let moedas = 0;
 let clienteAtual = null;
 let jogoPausado = false;
@@ -8,24 +10,22 @@ let precoUpgrade = 50;
 
 // Lista de Clientes da Vila Cogumelo
 const clientes = [
-    { nome: "Musguinho", pedidosPossiveis: ["Chá", "Bolo"], recompensaBase: 10 },
-    { nome: "Cerejinha", pedidosPossiveis: ["Café", "Torta", "Bolo"], recompensaBase: 15 }
+    { nome: "Musguinho", pedidosPossiveis: ["Chá", "Bolo"], recompensa: 10 },
+    { nome: "Cerejinha", pedidosPossiveis: ["Café", "Torta", "Bolo"], recompensa: 15 }
 ];
 
 // ==========================================
 // 2. REFERÊNCIAS DO HTML (DOM)
 // ==========================================
-// Certifique-se de que essas variáveis apontam para os IDs corretos do seu HTML:
-const textoPedidoElement = document.getElementById('balao-pedido');
-const qtdMoedasElement = document.getElementById('moedas'); // Coloque o ID da sua div/span de moedas
-
-// Elementos da Tela (DOM)
 const qtdMoedasElement = document.getElementById('qtd-moedas');
 const textoPedidoElement = document.getElementById('texto-pedido');
 const btnPause = document.getElementById('btn-pause');
 
+// ==========================================
+// 3. FUNÇÕES DO JOGO
+// ==========================================
+
 // Função para Gerar um Novo Cliente
-// Substitua a sua função antigo 'novoCliente' por esta nova versão:
 function novoCliente() {
     if (jogoPausado) return;
 
@@ -41,6 +41,7 @@ function novoCliente() {
     textoPedidoElement.innerText = `${clienteAtual.nome}: Quero um(a) ${clienteAtual.pedido}!`;
 }
 
+// Função para Comprar Melhoria na Lojinha
 function comprarUpgrade() {
     if (moedas >= precoUpgrade) {
         moedas -= precoUpgrade;
@@ -51,12 +52,13 @@ function comprarUpgrade() {
             qtdMoedasElement.innerText = moedas;
         }
         
-        alert("Cafeteira melhorada! Clientes chegam mais rápido.");
+        alert(`Cafeteira melhorada para o Nível ${nivelCafeteira}! Os clientes vão chegar mais rápido.`);
     } else {
         alert("Moedas insuficientes!");
     }
 }
-// Função para Processar a Entrega do Pedido (Ativada pelos botões do HTML)
+
+// Função para Processar a Entrega do Pedido
 function entregarPedido(item) {
     if (jogoPausado || !clienteAtual) return;
 
@@ -66,9 +68,11 @@ function entregarPedido(item) {
         qtdMoedasElement.innerText = moedas;
         textoPedidoElement.innerText = "Muito obrigado! ❤️";
         
-        // Aguarda 1.5 segundo e chama o próximo cliente
+        // Quanto maior o nível da cafeteira, menor o tempo de espera (mínimo de 400ms)
+        const tempoEspera = Math.max(400, 1800 - (nivelCafeteira * 300));
+        
         clienteAtual = null;
-        setTimeout(novoCliente, 1500);
+        setTimeout(novoCliente, tempoEspera);
     } else {
         // Errou o pedido
         textoPedidoElement.innerText = "Ops! Não foi isso que eu pedi...";
