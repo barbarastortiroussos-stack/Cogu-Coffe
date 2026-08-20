@@ -136,3 +136,55 @@ body {
 #lojinha .btn-item:hover {
     background-color: #21867a;
 }
+.painel-loja {
+  background-color: #2b1f1d;
+  color: #f7e1d7;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.grid-loja {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.card-item {
+  background: #3e2c29;
+  border: 2px solid #6b4438;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+}
+
+.card-item.item-comprado {
+  opacity: 0.6;
+  border-color: #4caf50;
+}
+
+.icone-item {
+  font-size: 2rem;
+  margin-bottom: 5px;
+}
+
+.card-item button {
+  background-color: #8c533e;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.card-item button:hover:not(:disabled) {
+  background-color: #b56c52;
+}
+
+.card-item button:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
