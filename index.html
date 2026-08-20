@@ -1,50 +1,55 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cogu City - Cafeteria</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cogu Coffee - Vila Cogumelo</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Painel de Informações (Moedas e Pontos) -->
-    <header id="placar">
-        <div class="moedas">Moedas: <span id="qtd-moedas">0</span> 🪙</div>
-        <button id="btn-pause">Pausar</button>
-    </header>
+  <!-- 1. PLACAR DO JOGO -->
+  <div id="placar">
+    <h1>🍄 Cogu Coffee</h1>
+    <div>
+      <span>Moedas: 🪙 <strong id="qtd-moedas">0</strong></span>
+    </div>
+    <button id="btn-pause">Pausar</button>
+  </div>
 
-    <!-- Área Principal do Jogo (O Balcão) -->
-    <main id="cenario">
-        
-        <!-- Onde o cliente vai aparecer -->
-        <div id="area-cliente">
-            <img id="sprite-cliente" src="" alt="Cliente Atual">
-            <div id="balao-pedido">
-                <p id="texto-pedido">Aguardando cliente...</p>
-            </div>
-        </div>
+  <!-- 2. CENÁRIO E ÁREA DO CLIENTE -->
+  <div id="cenario">
+    
+    <div id="area-cliente">
+      <div id="balao-pedido">
+        <span id="texto-pedido">Carregando pedido...</span>
+      </div>
+      <img id="sprite-cliente" src="customer-1.png" alt="Cliente">
+    </div>
 
-        <!-- Balcão de Pratos -->
-        <div id="balcao">
-            <button class="btn-item" onclick="entregarPedido('Chá')">☕ Chá</button>
-            <button class="btn-item" onclick="entregarPedido('Bolo')">🍰 Bolo</button>
-            <button class="btn-item" onclick="entregarPedido('Café')">☕ Café</button>
-            <button class="btn-item" onclick="entregarPedido('Torta')">🥧 Torta</button>
-        </div>
+    <!-- BALCÃO COM BOTÕES DE ENTREGA DE PEDIDOS -->
+    <div id="balcao">
+      <button class="btn-item" onclick="entregarPedido('Café')">☕ Café</button>
+      <button class="btn-item" onclick="entregarPedido('Chá')">🍵 Chá</button>
+      <button class="btn-item" onclick="entregarPedido('Bolo')">🍰 Bolo</button>
+      <button class="btn-item" onclick="entregarPedido('Torta')">🥧 Torta</button>
+    </div>
 
-    </main>
+  </div>
 
-    <!-- Lojinha de Melhorias -->
-    <section id="lojinha">
-        <h2>Lojinha de Melhorias</h2>
-        <button class="btn-item" onclick="comprarUpgrade()">Melhorar Cafeteira (Upgrade)</button>
-    </section>
+  <!-- 3. PAINEL DA LOJINHA DE MELHORIAS -->
+  <div class="painel-loja" id="lojinha">
+    <h2>🏪 Lojinha da Vila Cogumelo</h2>
+    <p style="margin-bottom: 10px;">Compre receitas e atraia novos clientes para a cafeteria!</p>
+    
+    <!-- É AQUI QUE O JAVASCRIPT DESENHA OS CARDS -->
+    <div id="container-itens-loja" class="grid-loja"></div>
+  </div>
 
-    <!-- Áudio de Fundo (Deve ficar ANTES do script para o JS encontrar o elemento) -->
-    <audio id="musica-fundo" loop src="vibehorn-lo-fi-music-romantic-jazzy-love-479215.mp3"></audio>
+  <!-- Elemento de Áudio para Música de Fundo -->
+  <audio id="musica-fundo" src="musica.mp3" loop></audio>
 
-    <!-- Conexão com a Lógica do Jogo -->
-    <script src="script.js"></script>
+  <!-- Script do Jogo -->
+  <script src="script.js"></script>
 </body>
 </html>
