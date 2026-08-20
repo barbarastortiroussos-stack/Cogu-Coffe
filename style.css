@@ -4,7 +4,6 @@
     padding: 0;
     box-sizing: border-box;
 }
-
 body {
     background-color: #1e1e24;
     display: flex;
@@ -14,7 +13,6 @@ body {
     min-height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-
 /* Placar de topo */
 #placar {
     width: 800px;
@@ -28,7 +26,6 @@ body {
     border: 3px solid #5a4338;
     border-bottom: none;
 }
-
 #btn-pause {
     background-color: #e76f51;
     color: white;
@@ -38,7 +35,6 @@ body {
     cursor: pointer;
     font-weight: bold;
 }
-
 /* Onde a imagem do cenário é aplicada */
 #cenario {
     width: 800px;
@@ -51,7 +47,6 @@ body {
     border-radius: 0 0 12px 12px;
     overflow: hidden;
 }
-
 /* Área do cliente posicionada certinho no balcão */
 #area-cliente {
     position: absolute;
@@ -63,14 +58,12 @@ body {
     align-items: center;
     z-index: 2;
 }
-
 /* Tamanho do personagem */
 #sprite-cliente {
     width: 220px; /* Aumentado para eles não ficarem pequenininhos */
     height: auto;
     object-fit: contain;
 }
-
 /* Balão de fala bonitinho acima da cabeça */
 #balao-pedido {
     background-color: #ffffff;
@@ -83,7 +76,6 @@ body {
     font-weight: bold;
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
-
 /* Balcão com botões de itens */
 #balcao {
     position: absolute;
@@ -91,9 +83,10 @@ body {
     width: 100%;
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
     gap: 20px;
+    padding: 0 20px;
 }
-
 .btn-item {
     background-color: #f4a261;
     border: 2px solid #e76f51;
@@ -104,11 +97,9 @@ body {
     cursor: pointer;
     transition: transform 0.1s;
 }
-
 .btn-item:hover {
     transform: scale(1.05);
 }
-
 /* Container da Lojinha de Melhorias */
 #lojinha {
     width: 800px;
@@ -120,19 +111,16 @@ body {
     border: 3px solid #5a4338;
     text-align: center;
 }
-
 #lojinha h2 {
     font-size: 20px;
     color: #f4a261;
     margin-bottom: 12px;
 }
-
 #lojinha .btn-item {
     background-color: #2a9d8f;
     border-color: #264653;
     color: white;
 }
-
 #lojinha .btn-item:hover {
     background-color: #21867a;
 }
@@ -144,14 +132,12 @@ body {
   max-width: 600px;
   margin: 0 auto;
 }
-
 .grid-loja {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 15px;
   margin-top: 15px;
 }
-
 .card-item {
   background: #3e2c29;
   border: 2px solid #6b4438;
@@ -159,17 +145,14 @@ body {
   padding: 12px;
   text-align: center;
 }
-
 .card-item.item-comprado {
   opacity: 0.6;
   border-color: #4caf50;
 }
-
 .icone-item {
   font-size: 2rem;
   margin-bottom: 5px;
 }
-
 .card-item button {
   background-color: #8c533e;
   color: white;
@@ -179,12 +162,65 @@ body {
   cursor: pointer;
   font-weight: bold;
 }
-
 .card-item button:hover:not(:disabled) {
   background-color: #b56c52;
 }
-
 .card-item button:disabled {
   background-color: #555;
   cursor: not-allowed;
+}
+
+/* ==========================================
+   NOTIFICAÇÕES (TOASTS) — substituem os alert()
+   ========================================== */
+#container-toasts {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 999;
+  pointer-events: none;
+}
+
+.toast {
+  min-width: 220px;
+  max-width: 340px;
+  padding: 12px 18px;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  border: 2px solid rgba(255,255,255,0.15);
+  animation: toast-entrar 0.25s ease-out;
+}
+
+.toast-sucesso {
+  background-color: #2a9d8f;
+}
+
+.toast-erro {
+  background-color: #e76f51;
+}
+
+.toast-info {
+  background-color: #3a2e2b;
+}
+
+.toast-saindo {
+  animation: toast-sair 0.3s ease-in forwards;
+}
+
+@keyframes toast-entrar {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toast-sair {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-12px); }
 }
