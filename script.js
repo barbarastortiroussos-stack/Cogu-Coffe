@@ -58,6 +58,16 @@ const itensLojinha = [
     descricao: "Bebida relaxante adicionada aos pedidos possíveis.",
     icone: "🍵"
   },
+  {
+    id: "cha_cogumelos",
+    nome: "Chá de Cogumelos",
+    tipo: "cardapio",
+    preco: 0,
+    comprado: false,
+    descricao: "Receita secreta da vila — só é conquistada atendendo clientes, não é vendida na loja!",
+    icone: "🍄",
+    ocultoNaLoja: true // não aparece como comprável; só some da lista de "oculto" quando desbloqueado por marco
+  },
 
   // --- PERSONAGENS / CLIENTES ---
   {
@@ -110,6 +120,20 @@ let tempoRestantePaciencia = 0;
 let intervaloPaciencia = null;
 
 // ==========================================
+// SISTEMA DE MARCOS DE RECOMPENSA (ENGAJAMENTO)
+// ==========================================
+let contadorClientesAtendidos = 0;
+let marcosResgatados = []; // guarda as "quantidade" já premiadas, pra não repetir
+
+const MARCOS_RECOMPENSA = [
+  { quantidade: 5, tipo: 'item', itemId: 'cha_cogumelos', mensagem: "Receita secreta desbloqueada: Chá de Cogumelos! 🍄" },
+  { quantidade: 15, tipo: 'moedas', valor: 40, mensagem: "Bônus de fidelidade: +40 moedas! 🪙" },
+  { quantidade: 30, tipo: 'moedas', valor: 90, mensagem: "Bônus de fidelidade: +90 moedas! 🪙" }
+];
+
+const progressoMarcoElement = document.getElementById('progresso-marco');
+
+// ==========================================
 // 3. SALVAMENTO E CARREGAMENTO (localStorage)
 // ==========================================
 
@@ -118,7 +142,9 @@ function salvarJogo() {
     moedas,
     nivelCafeteira,
     precoUpgrade,
-    itensComprados: itensLojinha.filter(i => i.comprado).map(i => i.id)
+    itensComprados: itensLojinha.filter(i => i.comprado).map(i => i.id),
+    contadorClientesAtendidos,
+    marcosResgatados
   };
 
   try {
@@ -146,6 +172,8 @@ function carregarJogo() {
   moedas = dadosSalvos.moedas ?? 0;
   nivelCafeteira = dadosSalvos.nivelCafeteira ?? 1;
   precoUpgrade = dadosSalvos.precoUpgrade ?? 50;
+  contadorClientesAtendidos = dadosSalvos.contadorClientesAtendidos ?? 0;
+  marcosResgatados = dadosSalvos.marcosResgatados ?? [];
 
   const idsComprados = new Set(dadosSalvos.itensComprados || []);
 
@@ -192,6 +220,49 @@ function mostrarToast(mensagem, tipo = 'info') {
 // ==========================================
 // 5. FUNÇÕES DO JOGO
 // ==========================================
+
+// Confere se algum marco foi alcançado depois de atender mais um cliente
+function verificarMarcos() {
+  MARCOS_RECOMPENSA.forEach(marco => {
+    if (contadorClientesAtendidos >= marco.quantidade && !marcosResgatados.includes(marco.quantidade)) {
+      concederRecompensa(marco);
+      marcosResgatados.push(marco.quantidade);
+    }
+  });
+}
+
+// Aplica a recompensa de um marco (moedas ou item liberado de graça)
+function concederRecompensa(marco) {
+  if (marco.tipo === 'moedas') {
+    moedas += marco.valor;
+    atualizarEconomia();
+  } else if (marco.tipo === 'item') {
+    const item = itensLojinha.find(i => i.id === marco.itemId);
+    if (item && !item.comprado) {
+      item.comprado = true;
+      desbloquearConteudoJogo(item);
+      renderizarLojinha();
+      renderizarBalcao();
+    }
+  }
+
+  mostrarToast(marco.mensagem, 'conquista');
+}
+
+// Atualiza o textinho de progresso no placar ("faltam X clientes para a próxima recompensa")
+function atualizarProgressoMarco() {
+  if (!progressoMarcoElement) return;
+
+  const proximoMarco = MARCOS_RECOMPENSA.find(m => !marcosResgatados.includes(m.quantidade));
+
+  if (!proximoMarco) {
+    progressoMarcoElement.innerText = `Clientes atendidos: ${contadorClientesAtendidos} — todas as recompensas coletadas! 🏆`;
+    return;
+  }
+
+  const faltam = Math.max(0, proximoMarco.quantidade - contadorClientesAtendidos);
+  progressoMarcoElement.innerText = `Clientes atendidos: ${contadorClientesAtendidos} — faltam ${faltam} para a próxima recompensa`;
+}
 
 // Atualiza o contador de moedas na tela do jogo e na loja
 function atualizarEconomia() {
@@ -336,7 +407,10 @@ function entregarPedido(item) {
     // Acertou o pedido!
     pararPaciencia();
     moedas += clienteAtual.recompensa;
+    contadorClientesAtendidos++;
     atualizarEconomia();
+    verificarMarcos();
+    atualizarProgressoMarco();
     salvarJogo();
 
     if (textoPedidoElement) {
@@ -410,7 +484,9 @@ function renderizarLojinha() {
 
   container.innerHTML = ""; // Limpa a lista antes de redesenhar
 
-  itensLojinha.forEach(item => {
+  itensLojinha
+    .filter(item => !item.ocultoNaLoja || item.comprado)
+    .forEach(item => {
     const card = document.createElement("div");
     card.className = `card-item ${item.comprado ? 'item-comprado' : ''}`;
 
@@ -492,4 +568,5 @@ carregarJogo();
 renderizarLojinha();
 renderizarBalcao();
 atualizarEconomia();
+atualizarProgressoMarco();
 novoCliente(); // Inicia o primeiro cliente assim que o jogo abre
