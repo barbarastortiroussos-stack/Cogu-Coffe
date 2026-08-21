@@ -82,7 +82,7 @@ const itensLojinha = [
       nome: "Fada Luminosa",
       pedidosPossiveis: ["Chá", "Chá de Camomila Estelar", "Bolo"],
       recompensa: 30,
-      foto: "customer-1.png" // Troque pelo caminho do sprite dela
+      foto: "Gemini_Generated_Image_35y1fw35y1fw35y1.jpg" // Troque pelo caminho do sprite dela
     }
   },
   {
