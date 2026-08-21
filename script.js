@@ -82,7 +82,10 @@ const itensLojinha = [
       nome: "Fada Luminosa",
       pedidosPossiveis: ["Chá", "Chá de Camomila Estelar", "Bolo"],
       recompensa: 30,
-      foto: "Gemini_Generated_Image_35y1fw35y1fw35y1.jpg" // Troque pelo caminho do sprite dela
+      foto: "Gemini_Generated_Image_35y1fw35y1fw35y1.jpg"
+      .fundo-preto {
+  mix-blend-mode: screen;
+}
     }
   },
   {
@@ -97,7 +100,10 @@ const itensLojinha = [
       nome: "Duende Ancião",
       pedidosPossiveis: ["Café", "Muffin de Mirtilo", "Torta"],
       recompensa: 50,
-      foto: "Gemini_Generated_Image_1k7jhe1k7jhe1k7j.jpg" // Troque pelo caminho do sprite dele
+      foto: "Gemini_Generated_Image_1k7jhe1k7jhe1k7j.jpg"
+      .fundo-branco {
+  mix-blend-mode: multiply;
+}
     }
   }
 ];
