@@ -1,4 +1,3 @@
-
 // ==========================================
 // 1. ESTADO DO JOGO (VARIÁVEIS PRINCIPAIS)
 // ==========================================
@@ -73,7 +72,7 @@ const itensLojinha = [
       nome: "Fada Luminosa",
       pedidosPossiveis: ["Chá", "Chá de Camomila Estelar", "Bolo"],
       recompensa: 30,
-      foto: "Gemini_Generated_Image_35y1fw35y1fw35y1.jpg" // Troque pelo caminho do sprite dela
+      foto: "customer-1.png" // Troque pelo caminho do sprite dela
     }
   },
   {
@@ -88,7 +87,7 @@ const itensLojinha = [
       nome: "Duende Ancião",
       pedidosPossiveis: ["Café", "Muffin de Mirtilo", "Torta"],
       recompensa: 50,
-      foto: "Gemini_Generated_Image_1k7jhe1k7jhe1k7j.jpg" // Troque pelo caminho do sprite dele
+      foto: "customer-2.png" // Troque pelo caminho do sprite dele
     }
   }
 ];
@@ -101,6 +100,14 @@ const textoPedidoElement = document.getElementById('texto-pedido');
 const btnPause = document.getElementById('btn-pause');
 const musica = document.getElementById('musica-fundo');
 const balcaoElement = document.getElementById('balcao');
+const barraPacienciaElement = document.getElementById('barra-paciencia');
+
+// Tempo que cada cliente espera antes de ir embora, e intervalo de atualização da barra
+const TEMPO_PACIENCIA_MS = 9000;
+const INTERVALO_TICK_PACIENCIA_MS = 100;
+
+let tempoRestantePaciencia = 0;
+let intervaloPaciencia = null;
 
 // ==========================================
 // 3. SALVAMENTO E CARREGAMENTO (localStorage)
@@ -247,6 +254,63 @@ function novoCliente() {
   if (textoPedidoElement) {
     textoPedidoElement.innerText = `${clienteAtual.nome}: Quero um(a) ${clienteAtual.pedido}!`;
   }
+
+  iniciarPaciencia();
+}
+
+// Inicia (ou reinicia) o cronômetro de paciência do cliente atual
+function iniciarPaciencia() {
+  pararPaciencia(); // por segurança, garante que não haja dois timers rodando ao mesmo tempo
+
+  tempoRestantePaciencia = TEMPO_PACIENCIA_MS;
+  atualizarBarraPaciencia();
+
+  intervaloPaciencia = setInterval(() => {
+    if (jogoPausado) return; // não desconta paciência enquanto o jogo está pausado
+
+    tempoRestantePaciencia -= INTERVALO_TICK_PACIENCIA_MS;
+    atualizarBarraPaciencia();
+
+    if (tempoRestantePaciencia <= 0) {
+      clientePerdeuPaciencia();
+    }
+  }, INTERVALO_TICK_PACIENCIA_MS);
+}
+
+function pararPaciencia() {
+  if (intervaloPaciencia) {
+    clearInterval(intervaloPaciencia);
+    intervaloPaciencia = null;
+  }
+}
+
+// Atualiza a largura e a cor da barra de acordo com o tempo restante
+function atualizarBarraPaciencia() {
+  if (!barraPacienciaElement) return;
+
+  const porcentagem = Math.max(0, (tempoRestantePaciencia / TEMPO_PACIENCIA_MS) * 100);
+  barraPacienciaElement.style.width = `${porcentagem}%`;
+
+  barraPacienciaElement.classList.remove('paciencia-media', 'paciencia-baixa');
+  if (porcentagem <= 25) {
+    barraPacienciaElement.classList.add('paciencia-baixa');
+  } else if (porcentagem <= 55) {
+    barraPacienciaElement.classList.add('paciencia-media');
+  }
+}
+
+// Chamado quando o tempo do cliente atual chega a zero
+function clientePerdeuPaciencia() {
+  pararPaciencia();
+  if (!clienteAtual) return;
+
+  if (textoPedidoElement) {
+    textoPedidoElement.innerText = `${clienteAtual.nome} perdeu a paciência e foi embora... 😤`;
+  }
+  mostrarToast("O cliente foi embora sem ser atendido a tempo!", 'erro');
+
+  clienteAtual = null;
+  setTimeout(novoCliente, 1200);
 }
 
 // Função para Comprar Melhoria na Cafeteira
@@ -270,6 +334,7 @@ function entregarPedido(item) {
 
   if (item === clienteAtual.pedido) {
     // Acertou o pedido!
+    pararPaciencia();
     moedas += clienteAtual.recompensa;
     atualizarEconomia();
     salvarJogo();
