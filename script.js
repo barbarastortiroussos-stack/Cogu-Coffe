@@ -4,6 +4,7 @@
 let moedas = 0;
 let clienteAtual = null;
 let jogoPausado = false;
+let lojaAberta = false;
 
 let nivelCafeteira = 1;
 let precoUpgrade = 50;
@@ -13,14 +14,14 @@ const CHAVE_SAVE = "coguCoffeeSave";
 // Lista Inicial de Clientes da Vila Cogumelo (fonte da verdade — nunca é alterada)
 const CLIENTES_BASE = [
   {
-    nome: "Musguinho",
-    pedidosPossiveis: ["Chá", "Bolo"],
+    nome: "Mossling",
+    pedidosPossiveis: ["Tea", "Cake"],
     recompensa: 10,
     foto: "customer-2.png"
   },
   {
-    nome: "Cerejinha",
-    pedidosPossiveis: ["Café", "Torta", "Bolo"],
+    nome: "Cherryling",
+    pedidosPossiveis: ["Coffee", "Pie", "Cake"],
     recompensa: 15,
     foto: "customer-1.png"
   }
@@ -28,10 +29,10 @@ const CLIENTES_BASE = [
 
 // Ícones dos pedidos "de base" (os que já vinham fixos no balcão)
 const ICONES_PEDIDOS_BASE = {
-  "Café": "☕",
-  "Chá": "🍵",
-  "Bolo": "🍰",
-  "Torta": "🥧"
+  "Coffee": "☕",
+  "Tea": "🍵",
+  "Cake": "🍰",
+  "Pie": "🥧"
 };
 
 // Lista de clientes atualmente ativos no jogo (recalculada a partir de CLIENTES_BASE + compras)
@@ -42,29 +43,29 @@ const itensLojinha = [
   // --- CARDÁPIO ---
   {
     id: "muffin_cogumelo",
-    nome: "Muffin de Mirtilo",
+    nome: "Blueberry Muffin",
     tipo: "cardapio",
     preco: 50,
     comprado: false,
-    descricao: "Um doce fofinho que entra no cardápio de pedidos!",
+    descricao: "A fluffy sweet treat that gets added to the order menu!",
     icone: "🧁"
   },
   {
     id: "cha_estelar",
-    nome: "Chá de Camomila Estelar",
+    nome: "Starlight Chamomile Tea",
     tipo: "cardapio",
     preco: 80,
     comprado: false,
-    descricao: "Bebida relaxante adicionada aos pedidos possíveis.",
+    descricao: "A relaxing drink added to the possible orders.",
     icone: "🍵"
   },
   {
     id: "cha_cogumelos",
-    nome: "Chá de Cogumelos",
+    nome: "Mushroom Tea",
     tipo: "cardapio",
     preco: 0,
     comprado: false,
-    descricao: "Receita secreta da vila — só é conquistada atendendo clientes, não é vendida na loja!",
+    descricao: "A secret village recipe — only earned by serving customers, not sold in the shop!",
     icone: "🍄",
     ocultoNaLoja: true // não aparece como comprável; só some da lista de "oculto" quando desbloqueado por marco
   },
@@ -72,33 +73,32 @@ const itensLojinha = [
   // --- PERSONAGENS / CLIENTES ---
   {
     id: "cliente_fada",
-    nome: "Fada Luminosa",
+    nome: "Luminous Fairy",
     tipo: "personagem",
     preco: 150,
     comprado: false,
-    descricao: "Uma fada exigente que entra para a fila de clientes!",
+    descricao: "A demanding fairy joining the customer line!",
     icone: "🧚‍♀️",
     dadosCliente: {
-      nome: "Fada Luminosa",
-      pedidosPossiveis: ["Chá", "Chá de Camomila Estelar", "Bolo"],
+      nome: "Luminous Fairy",
+      pedidosPossiveis: ["Tea", "Starlight Chamomile Tea", "Cake"],
       recompensa: 30,
       foto: "Gemini_Generated_Image_35y1fw35y1fw35y1.jpg"
     }
   },
   {
     id: "cliente_duende",
-    nome: "Duende Ancião",
+    nome: "Elder Gnome",
     tipo: "personagem",
     preco: 250,
     comprado: false,
-    descricao: "Um cliente nobre que paga gorjetas altíssimas!",
+    descricao: "A noble customer who pays extremely high tips!",
     icone: "🧝",
     dadosCliente: {
-      nome: "Duende Ancião",
-      pedidosPossiveis: ["Café", "Muffin de Mirtilo", "Torta"],
+      nome: "Elder Gnome",
+      pedidosPossiveis: ["Coffee", "Blueberry Muffin", "Pie"],
       recompensa: 50,
       foto: "Gemini_Generated_Image_1k7jhe1k7jhe1k7j.jpg"
-    
     }
   }
 ];
@@ -112,6 +112,10 @@ const btnPause = document.getElementById('btn-pause');
 const musica = document.getElementById('musica-fundo');
 const balcaoElement = document.getElementById('balcao');
 const barraPacienciaElement = document.getElementById('barra-paciencia');
+
+const btnAbrirLoja = document.getElementById('btn-abrir-loja');
+const btnFecharLoja = document.getElementById('btn-fechar-loja');
+const lojaOverlayElement = document.getElementById('loja-overlay');
 
 // Tempo que cada cliente espera antes de ir embora, e intervalo de atualização da barra
 const TEMPO_PACIENCIA_MS = 9000;
@@ -127,9 +131,9 @@ let contadorClientesAtendidos = 0;
 let marcosResgatados = []; // guarda as "quantidade" já premiadas, pra não repetir
 
 const MARCOS_RECOMPENSA = [
-  { quantidade: 5, tipo: 'item', itemId: 'cha_cogumelos', mensagem: "Receita secreta desbloqueada: Chá de Cogumelos! 🍄" },
-  { quantidade: 15, tipo: 'moedas', valor: 40, mensagem: "Bônus de fidelidade: +40 moedas! 🪙" },
-  { quantidade: 30, tipo: 'moedas', valor: 90, mensagem: "Bônus de fidelidade: +90 moedas! 🪙" }
+  { quantidade: 5, tipo: 'item', itemId: 'cha_cogumelos', mensagem: "Secret recipe unlocked: Mushroom Tea! 🍄" },
+  { quantidade: 15, tipo: 'moedas', valor: 40, mensagem: "Loyalty bonus: +40 coins! 🪙" },
+  { quantidade: 30, tipo: 'moedas', valor: 90, mensagem: "Loyalty bonus: +90 coins! 🪙" }
 ];
 
 const progressoMarcoElement = document.getElementById('progresso-marco');
@@ -201,7 +205,7 @@ function garantirContainerToasts() {
   return containerToasts;
 }
 
-// tipo: 'sucesso' | 'erro' | 'info'
+// tipo: 'sucesso' | 'erro' | 'info' | 'conquista'
 function mostrarToast(mensagem, tipo = 'info') {
   const container = garantirContainerToasts();
 
@@ -257,12 +261,12 @@ function atualizarProgressoMarco() {
   const proximoMarco = MARCOS_RECOMPENSA.find(m => !marcosResgatados.includes(m.quantidade));
 
   if (!proximoMarco) {
-    progressoMarcoElement.innerText = `Clientes atendidos: ${contadorClientesAtendidos} — todas as recompensas coletadas! 🏆`;
+    progressoMarcoElement.innerText = `Customers served: ${contadorClientesAtendidos} — all rewards collected! 🏆`;
     return;
   }
 
   const faltam = Math.max(0, proximoMarco.quantidade - contadorClientesAtendidos);
-  progressoMarcoElement.innerText = `Clientes atendidos: ${contadorClientesAtendidos} — faltam ${faltam} para a próxima recompensa`;
+  progressoMarcoElement.innerText = `Customers served: ${contadorClientesAtendidos} — ${faltam} more until the next reward`;
 }
 
 // Atualiza o contador de moedas na tela do jogo e na loja
@@ -324,7 +328,7 @@ function novoCliente() {
 
   clienteAtual.pedido = pedidoSorteado;
   if (textoPedidoElement) {
-    textoPedidoElement.innerText = `${clienteAtual.nome}: Quero um(a) ${clienteAtual.pedido}!`;
+    textoPedidoElement.innerText = `${clienteAtual.nome}: I'd like a ${clienteAtual.pedido}, please!`;
   }
 
   iniciarPaciencia();
@@ -338,7 +342,7 @@ function iniciarPaciencia() {
   atualizarBarraPaciencia();
 
   intervaloPaciencia = setInterval(() => {
-    if (jogoPausado) return; // não desconta paciência enquanto o jogo está pausado
+    if (jogoPausado || lojaAberta) return; // não desconta paciência pausado ou com a loja aberta
 
     tempoRestantePaciencia -= INTERVALO_TICK_PACIENCIA_MS;
     atualizarBarraPaciencia();
@@ -377,9 +381,9 @@ function clientePerdeuPaciencia() {
   if (!clienteAtual) return;
 
   if (textoPedidoElement) {
-    textoPedidoElement.innerText = `${clienteAtual.nome} perdeu a paciência e foi embora... 😤`;
+    textoPedidoElement.innerText = `${clienteAtual.nome} lost their patience and left... 😤`;
   }
-  mostrarToast("O cliente foi embora sem ser atendido a tempo!", 'erro');
+  mostrarToast("The customer left before being served in time!", 'erro');
 
   clienteAtual = null;
   setTimeout(novoCliente, 1200);
@@ -394,9 +398,9 @@ function comprarUpgrade() {
 
     atualizarEconomia();
     salvarJogo();
-    mostrarToast(`Cafeteira melhorada para o Nível ${nivelCafeteira}! Os clientes vão chegar mais rápido.`, 'sucesso');
+    mostrarToast(`Café upgraded to Level ${nivelCafeteira}! Customers will arrive faster.`, 'sucesso');
   } else {
-    mostrarToast("Moedas insuficientes!", 'erro');
+    mostrarToast("Not enough coins!", 'erro');
   }
 }
 
@@ -415,7 +419,7 @@ function entregarPedido(item) {
     salvarJogo();
 
     if (textoPedidoElement) {
-      textoPedidoElement.innerText = "Muito obrigado! ❤️";
+      textoPedidoElement.innerText = "Thank you so much! ❤️";
     }
 
     // Quanto maior o nível da cafeteira, menor o tempo de espera (mínimo de 400ms)
@@ -426,7 +430,7 @@ function entregarPedido(item) {
   } else {
     // Errou o pedido
     if (textoPedidoElement) {
-      textoPedidoElement.innerText = "Ops! Não foi isso que eu pedi...";
+      textoPedidoElement.innerText = "Oops! That's not what I ordered...";
     }
   }
 }
@@ -441,7 +445,7 @@ function comprarItem(idItem) {
   if (!item) return;
 
   if (item.comprado) {
-    mostrarToast("Você já possui este item!", 'info');
+    mostrarToast("You already own this item!", 'info');
     return;
   }
 
@@ -455,9 +459,9 @@ function comprarItem(idItem) {
     renderizarBalcao();
     salvarJogo();
 
-    mostrarToast(`Sucesso! Você comprou: ${item.nome}! 🎉`, 'sucesso');
+    mostrarToast(`Success! You got: ${item.nome}! 🎉`, 'sucesso');
   } else {
-    mostrarToast("Moedas insuficientes! Atenda mais clientes na cafeteria para juntar moedas.", 'erro');
+    mostrarToast("Not enough coins! Serve more customers at the café to earn coins.", 'erro');
   }
 }
 
@@ -498,7 +502,7 @@ function renderizarLojinha() {
       <button 
         onclick="comprarItem('${item.id}')" 
         ${item.comprado ? 'disabled' : ''}>
-        ${item.comprado ? 'Adquirido ✓' : `Comprar (🪙 ${item.preco})`}
+        ${item.comprado ? 'Owned ✓' : `Buy (🪙 ${item.preco})`}
       </button>
     `;
 
@@ -507,7 +511,38 @@ function renderizarLojinha() {
 }
 
 // ==========================================
-// 7. EVENTOS E INICIALIZAÇÃO
+// 7. SISTEMA DE ABRIR/FECHAR A LOJA (MODAL)
+// ==========================================
+
+function abrirLoja() {
+  lojaAberta = true;
+  if (lojaOverlayElement) lojaOverlayElement.classList.add('ativo');
+}
+
+function fecharLoja() {
+  lojaAberta = false;
+  if (lojaOverlayElement) lojaOverlayElement.classList.remove('ativo');
+}
+
+if (btnAbrirLoja) {
+  btnAbrirLoja.addEventListener('click', abrirLoja);
+}
+
+if (btnFecharLoja) {
+  btnFecharLoja.addEventListener('click', fecharLoja);
+}
+
+// Fecha a loja se o jogador clicar no fundo escurecido (fora do painel)
+if (lojaOverlayElement) {
+  lojaOverlayElement.addEventListener('click', (evento) => {
+    if (evento.target === lojaOverlayElement) {
+      fecharLoja();
+    }
+  });
+}
+
+// ==========================================
+// 8. EVENTOS E INICIALIZAÇÃO
 // ==========================================
 
 // Botão de Pause
@@ -518,7 +553,7 @@ function definirPausa(pausar, porTrocaDeAba = false) {
 
   jogoPausado = pausar;
   if (btnPause) {
-    btnPause.innerText = jogoPausado ? "Continuar" : "Pausar";
+    btnPause.innerText = jogoPausado ? "Continue" : "Pause";
   }
   if (musica) {
     if (jogoPausado) musica.pause();
