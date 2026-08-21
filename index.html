@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
   <!-- 1. PLACAR DO JOGO -->
   <div id="placar">
     <h1>🍄 Cogu Coffee</h1>
@@ -16,7 +15,6 @@
     </div>
     <button id="btn-pause">Pausar</button>
   </div>
-
   <!-- 2. CENÁRIO E ÁREA DO CLIENTE -->
   <div id="cenario">
     
@@ -24,19 +22,15 @@
       <div id="balao-pedido">
         <span id="texto-pedido">Carregando pedido...</span>
       </div>
+      <div id="barra-paciencia-container">
+        <div id="barra-paciencia"></div>
+      </div>
       <img id="sprite-cliente" src="customer-1.png" alt="Cliente">
     </div>
-
     <!-- BALCÃO COM BOTÕES DE ENTREGA DE PEDIDOS -->
-    <div id="balcao">
-      <button class="btn-item" onclick="entregarPedido('Café')">☕ Café</button>
-      <button class="btn-item" onclick="entregarPedido('Chá')">🍵 Chá</button>
-      <button class="btn-item" onclick="entregarPedido('Bolo')">🍰 Bolo</button>
-      <button class="btn-item" onclick="entregarPedido('Torta')">🥧 Torta</button>
-    </div>
-
+    <!-- Os botões são gerados dinamicamente pelo script.js, com base nos pedidos desbloqueados -->
+    <div id="balcao"></div>
   </div>
-
   <!-- 3. PAINEL DA LOJINHA DE MELHORIAS -->
   <div class="painel-loja" id="lojinha">
     <h2>🏪 Lojinha da Vila Cogumelo</h2>
@@ -45,10 +39,8 @@
     <!-- É AQUI QUE O JAVASCRIPT DESENHA OS CARDS -->
     <div id="container-itens-loja" class="grid-loja"></div>
   </div>
-
   <!-- Elemento de Áudio para Música de Fundo -->
   <audio id="musica-fundo" src="musica.mp3" loop></audio>
-
   <!-- Script do Jogo -->
   <script src="script.js"></script>
 </body>
