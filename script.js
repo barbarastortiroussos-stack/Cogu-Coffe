@@ -1,3 +1,4 @@
+
 // ==========================================
 // 1. ESTADO DO JOGO (VARIÁVEIS PRINCIPAIS)
 // ==========================================
@@ -8,21 +9,34 @@ let jogoPausado = false;
 let nivelCafeteira = 1;
 let precoUpgrade = 50;
 
-// Lista Inicial de Clientes da Vila Cogumelo
-const clientes = [
-  { 
-    nome: "Musguinho", 
-    pedidosPossiveis: ["Chá", "Bolo"], 
+const CHAVE_SAVE = "coguCoffeeSave";
+
+// Lista Inicial de Clientes da Vila Cogumelo (fonte da verdade — nunca é alterada)
+const CLIENTES_BASE = [
+  {
+    nome: "Musguinho",
+    pedidosPossiveis: ["Chá", "Bolo"],
     recompensa: 10,
     foto: "customer-2.png"
   },
-  { 
-    nome: "Cerejinha", 
-    pedidosPossiveis: ["Café", "Torta", "Bolo"], 
+  {
+    nome: "Cerejinha",
+    pedidosPossiveis: ["Café", "Torta", "Bolo"],
     recompensa: 15,
-    foto: "customer-1.png" 
+    foto: "customer-1.png"
   }
 ];
+
+// Ícones dos pedidos "de base" (os que já vinham fixos no balcão)
+const ICONES_PEDIDOS_BASE = {
+  "Café": "☕",
+  "Chá": "🍵",
+  "Bolo": "🍰",
+  "Torta": "🥧"
+};
+
+// Lista de clientes atualmente ativos no jogo (recalculada a partir de CLIENTES_BASE + compras)
+let clientes = [];
 
 // Lista de Itens/Upgrades da Lojinha
 const itensLojinha = [
@@ -86,9 +100,90 @@ const qtdMoedasElement = document.getElementById('qtd-moedas');
 const textoPedidoElement = document.getElementById('texto-pedido');
 const btnPause = document.getElementById('btn-pause');
 const musica = document.getElementById('musica-fundo');
+const balcaoElement = document.getElementById('balcao');
 
 // ==========================================
-// 3. FUNÇÕES DO JOGO
+// 3. SALVAMENTO E CARREGAMENTO (localStorage)
+// ==========================================
+
+function salvarJogo() {
+  const dadosSalvos = {
+    moedas,
+    nivelCafeteira,
+    precoUpgrade,
+    itensComprados: itensLojinha.filter(i => i.comprado).map(i => i.id)
+  };
+
+  try {
+    localStorage.setItem(CHAVE_SAVE, JSON.stringify(dadosSalvos));
+  } catch (erro) {
+    console.log("Não foi possível salvar o progresso:", erro);
+  }
+}
+
+function carregarJogo() {
+  let dadosSalvos = null;
+
+  try {
+    const bruto = localStorage.getItem(CHAVE_SAVE);
+    if (bruto) dadosSalvos = JSON.parse(bruto);
+  } catch (erro) {
+    console.log("Não foi possível carregar o progresso salvo:", erro);
+  }
+
+  // Reconstrói a lista de clientes sempre a partir da base (evita duplicar em saves antigos)
+  clientes = CLIENTES_BASE.map(c => ({ ...c, pedidosPossiveis: [...c.pedidosPossiveis] }));
+
+  if (!dadosSalvos) return;
+
+  moedas = dadosSalvos.moedas ?? 0;
+  nivelCafeteira = dadosSalvos.nivelCafeteira ?? 1;
+  precoUpgrade = dadosSalvos.precoUpgrade ?? 50;
+
+  const idsComprados = new Set(dadosSalvos.itensComprados || []);
+
+  itensLojinha.forEach(item => {
+    if (idsComprados.has(item.id)) {
+      item.comprado = true;
+      desbloquearConteudoJogo(item); // reaplica o efeito da compra (cardápio ou novo cliente)
+    }
+  });
+}
+
+// ==========================================
+// 4. SISTEMA DE NOTIFICAÇÕES (TOASTS)
+// ==========================================
+
+let containerToasts = null;
+
+function garantirContainerToasts() {
+  if (containerToasts) return containerToasts;
+
+  containerToasts = document.createElement('div');
+  containerToasts.id = 'container-toasts';
+  document.body.appendChild(containerToasts);
+  return containerToasts;
+}
+
+// tipo: 'sucesso' | 'erro' | 'info'
+function mostrarToast(mensagem, tipo = 'info') {
+  const container = garantirContainerToasts();
+
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${tipo}`;
+  toast.innerText = mensagem;
+
+  container.appendChild(toast);
+
+  // Remove sozinho depois de alguns segundos
+  setTimeout(() => {
+    toast.classList.add('toast-saindo');
+    setTimeout(() => toast.remove(), 300);
+  }, 2600);
+}
+
+// ==========================================
+// 5. FUNÇÕES DO JOGO
 // ==========================================
 
 // Atualiza o contador de moedas na tela do jogo e na loja
@@ -96,6 +191,40 @@ function atualizarEconomia() {
   if (qtdMoedasElement) {
     qtdMoedasElement.innerText = moedas;
   }
+}
+
+// Descobre todos os tipos de pedido atualmente desbloqueados (união dos pedidos de todos os clientes)
+function obterPedidosDesbloqueados() {
+  const conjunto = new Set();
+  clientes.forEach(cliente => {
+    cliente.pedidosPossiveis.forEach(pedido => conjunto.add(pedido));
+  });
+  return [...conjunto];
+}
+
+// Descobre o ícone de um pedido: usa o ícone de base, ou o ícone cadastrado na lojinha, ou uma xícara genérica
+function obterIconePedido(nomePedido) {
+  if (ICONES_PEDIDOS_BASE[nomePedido]) return ICONES_PEDIDOS_BASE[nomePedido];
+
+  const itemCorrespondente = itensLojinha.find(i => i.nome === nomePedido);
+  if (itemCorrespondente) return itemCorrespondente.icone;
+
+  return "🍽️";
+}
+
+// Redesenha os botões do balcão com base nos pedidos desbloqueados no momento
+function renderizarBalcao() {
+  if (!balcaoElement) return;
+
+  balcaoElement.innerHTML = "";
+
+  obterPedidosDesbloqueados().forEach(pedido => {
+    const botao = document.createElement('button');
+    botao.className = 'btn-item';
+    botao.innerText = `${obterIconePedido(pedido)} ${pedido}`;
+    botao.addEventListener('click', () => entregarPedido(pedido));
+    balcaoElement.appendChild(botao);
+  });
 }
 
 // Função para Gerar um Novo Cliente
@@ -126,11 +255,12 @@ function comprarUpgrade() {
     moedas -= precoUpgrade;
     nivelCafeteira++;
     precoUpgrade *= 2; // O próximo upgrade fica mais caro
-    
+
     atualizarEconomia();
-    alert(`Cafeteira melhorada para o Nível ${nivelCafeteira}! Os clientes vão chegar mais rápido.`);
+    salvarJogo();
+    mostrarToast(`Cafeteira melhorada para o Nível ${nivelCafeteira}! Os clientes vão chegar mais rápido.`, 'sucesso');
   } else {
-    alert("Moedas insuficientes!");
+    mostrarToast("Moedas insuficientes!", 'erro');
   }
 }
 
@@ -142,14 +272,15 @@ function entregarPedido(item) {
     // Acertou o pedido!
     moedas += clienteAtual.recompensa;
     atualizarEconomia();
-    
+    salvarJogo();
+
     if (textoPedidoElement) {
       textoPedidoElement.innerText = "Muito obrigado! ❤️";
     }
-    
+
     // Quanto maior o nível da cafeteira, menor o tempo de espera (mínimo de 400ms)
     const tempoEspera = Math.max(400, 1800 - (nivelCafeteira * 300));
-    
+
     clienteAtual = null;
     setTimeout(novoCliente, tempoEspera);
   } else {
@@ -161,7 +292,7 @@ function entregarPedido(item) {
 }
 
 // ==========================================
-// 4. SISTEMA DA LOJINHA E DESBLOQUEIOS
+// 6. SISTEMA DA LOJINHA E DESBLOQUEIOS
 // ==========================================
 
 function comprarItem(idItem) {
@@ -170,21 +301,23 @@ function comprarItem(idItem) {
   if (!item) return;
 
   if (item.comprado) {
-    alert("Você já possui este item!");
+    mostrarToast("Você já possui este item!", 'info');
     return;
   }
 
   if (moedas >= item.preco) {
     moedas -= item.preco;
     item.comprado = true;
-    
+
     atualizarEconomia();
     desbloquearConteudoJogo(item);
     renderizarLojinha();
-    
-    alert(`Sucesso! Você comprou: ${item.nome}! 🎉`);
+    renderizarBalcao();
+    salvarJogo();
+
+    mostrarToast(`Sucesso! Você comprou: ${item.nome}! 🎉`, 'sucesso');
   } else {
-    alert("Moedas insuficientes! Atenda mais clientes na cafeteria para juntar moedas.");
+    mostrarToast("Moedas insuficientes! Atenda mais clientes na cafeteria para juntar moedas.", 'erro');
   }
 }
 
@@ -198,21 +331,24 @@ function desbloquearConteudoJogo(item) {
       }
     });
   } else if (item.tipo === "personagem" && item.dadosCliente) {
-    // Adiciona o novo cliente comprado na lista de visitantes possíveis
-    clientes.push(item.dadosCliente);
+    // Adiciona o novo cliente comprado na lista de visitantes possíveis (evita duplicar)
+    const jaExiste = clientes.some(c => c.nome === item.dadosCliente.nome);
+    if (!jaExiste) {
+      clientes.push({ ...item.dadosCliente, pedidosPossiveis: [...item.dadosCliente.pedidosPossiveis] });
+    }
   }
 }
 
 function renderizarLojinha() {
   const container = document.getElementById("container-itens-loja");
   if (!container) return;
-  
+
   container.innerHTML = ""; // Limpa a lista antes de redesenhar
 
   itensLojinha.forEach(item => {
     const card = document.createElement("div");
     card.className = `card-item ${item.comprado ? 'item-comprado' : ''}`;
-    
+
     card.innerHTML = `
       <div class="icone-item">${item.icone}</div>
       <h3>${item.nome}</h3>
@@ -229,22 +365,49 @@ function renderizarLojinha() {
 }
 
 // ==========================================
-// 5. EVENTOS E INICIALIZAÇÃO
+// 7. EVENTOS E INICIALIZAÇÃO
 // ==========================================
 
 // Botão de Pause
+let pausadoManualmente = false; // controla se foi o JOGADOR quem pausou (pra não "despausar" sozinho)
+
+function definirPausa(pausar, porTrocaDeAba = false) {
+  if (!porTrocaDeAba) pausadoManualmente = pausar;
+
+  jogoPausado = pausar;
+  if (btnPause) {
+    btnPause.innerText = jogoPausado ? "Continuar" : "Pausar";
+  }
+  if (musica) {
+    if (jogoPausado) musica.pause();
+    else musica.play().catch(() => {});
+  }
+}
+
 if (btnPause) {
   btnPause.addEventListener('click', () => {
-    jogoPausado = !jogoPausado;
-    btnPause.innerText = jogoPausado ? "Continuar" : "Pausar";
+    definirPausa(!jogoPausado);
   });
 }
+
+// Pausa automaticamente quando o jogador troca de aba/minimiza (recomendado por Poki/CrazyGames)
+// e retoma sozinho ao voltar — mas só se o jogador não tinha pausado manualmente antes
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    definirPausa(true, true);
+  } else if (!pausadoManualmente) {
+    definirPausa(false, true);
+  }
+});
+
+// Salva o progresso automaticamente antes de fechar a aba
+window.addEventListener('beforeunload', salvarJogo);
 
 // Música de Fundo
 function iniciarMusica() {
   if (musica) {
     musica.volume = 0.25; // Volume a 25%
-    
+
     musica.onended = () => {
       musica.currentTime = 0;
       musica.play();
@@ -260,6 +423,8 @@ function iniciarMusica() {
 document.addEventListener('click', iniciarMusica, { once: true });
 
 // Inicializações de início de jogo
+carregarJogo();
 renderizarLojinha();
+renderizarBalcao();
 atualizarEconomia();
 novoCliente(); // Inicia o primeiro cliente assim que o jogo abre
