@@ -88,7 +88,7 @@ const itensLojinha = [
       nome: "Duende Ancião",
       pedidosPossiveis: ["Café", "Muffin de Mirtilo", "Torta"],
       recompensa: 50,
-      foto: "customer-2.png" // Troque pelo caminho do sprite dele
+      foto: "Gemini_Generated_Image_1k7jhe1k7jhe1k7j.jpg" // Troque pelo caminho do sprite dele
     }
   }
 ];
