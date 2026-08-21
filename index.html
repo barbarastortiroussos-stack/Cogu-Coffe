@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cogu Coffee - Vila Cogumelo</title>
+  <title>Cogu Coffee - Mushroom Village</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,35 +11,43 @@
   <div id="placar">
     <h1>🍄 Cogu Coffee</h1>
     <div>
-      <span>Moedas: 🪙 <strong id="qtd-moedas">0</strong></span><br>
+      <span>Coins: 🪙 <strong id="qtd-moedas">0</strong></span><br>
       <span id="progresso-marco" class="texto-progresso"></span>
     </div>
-    <button id="btn-pause">Pausar</button>
+    <div class="botoes-placar">
+      <button id="btn-abrir-loja">🏪 Shop</button>
+      <button id="btn-pause">Pause</button>
+    </div>
   </div>
   <!-- 2. CENÁRIO E ÁREA DO CLIENTE -->
   <div id="cenario">
     
     <div id="area-cliente">
       <div id="balao-pedido">
-        <span id="texto-pedido">Carregando pedido...</span>
+        <span id="texto-pedido">Loading order...</span>
       </div>
       <div id="barra-paciencia-container">
         <div id="barra-paciencia"></div>
       </div>
-      <img id="sprite-cliente" src="customer-1.png" alt="Cliente">
+      <img id="sprite-cliente" src="customer-1.png" alt="Customer">
     </div>
     <!-- BALCÃO COM BOTÕES DE ENTREGA DE PEDIDOS -->
     <!-- Os botões são gerados dinamicamente pelo script.js, com base nos pedidos desbloqueados -->
     <div id="balcao"></div>
   </div>
-  <!-- 3. PAINEL DA LOJINHA DE MELHORIAS -->
-  <div class="painel-loja" id="lojinha">
-    <h2>🏪 Lojinha da Vila Cogumelo</h2>
-    <p style="margin-bottom: 10px;">Compre receitas e atraia novos clientes para a cafeteria!</p>
-    
-    <!-- É AQUI QUE O JAVASCRIPT DESENHA OS CARDS -->
-    <div id="container-itens-loja" class="grid-loja"></div>
+
+  <!-- 3. LOJA COMO MODAL (fica escondida até o jogador clicar em "Shop") -->
+  <div id="loja-overlay" class="loja-overlay">
+    <div class="painel-loja" id="lojinha">
+      <button id="btn-fechar-loja" class="btn-fechar-loja" aria-label="Close shop">✕</button>
+      <h2>🏪 Mushroom Village Shop</h2>
+      <p style="margin-bottom: 10px;">Buy recipes and attract new customers to the café!</p>
+
+      <!-- É AQUI QUE O JAVASCRIPT DESENHA OS CARDS -->
+      <div id="container-itens-loja" class="grid-loja"></div>
+    </div>
   </div>
+
   <!-- Elemento de Áudio para Música de Fundo -->
   <audio id="musica-fundo" src="vibehorn-lo-fi-music-romantic-jazzy-love-479215.mp3" loop></audio>
   <!-- Script do Jogo -->
