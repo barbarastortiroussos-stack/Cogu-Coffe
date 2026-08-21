@@ -90,6 +90,7 @@ body {
     width: 220px; /* Aumentado para eles não ficarem pequenininhos */
     height: auto;
     object-fit: contain;
+    pointer-events: none; /* deixa o clique "atravessar" o sprite e chegar nos botões do balcão */
 }
 /* Balão de fala bonitinho acima da cabeça */
 #balao-pedido {
@@ -113,6 +114,7 @@ body {
     flex-wrap: wrap;
     gap: 20px;
     padding: 0 20px;
+    z-index: 3;
 }
 .btn-item {
     background-color: #f4a261;
