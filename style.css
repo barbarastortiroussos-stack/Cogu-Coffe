@@ -35,6 +35,10 @@ body {
     cursor: pointer;
     font-weight: bold;
 }
+.texto-progresso {
+    font-size: 12px;
+    opacity: 0.8;
+}
 /* Onde a imagem do cenário é aplicada */
 #cenario {
     width: 800px;
@@ -232,6 +236,13 @@ body {
 
 .toast-info {
   background-color: #3a2e2b;
+}
+
+.toast-conquista {
+  background: linear-gradient(135deg, #f4a261, #e9c46a);
+  color: #3a2e2b;
+  border-color: #fff3d6;
+  font-size: 15px;
 }
 
 .toast-saindo {
