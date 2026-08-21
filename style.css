@@ -58,6 +58,29 @@ body {
     align-items: center;
     z-index: 2;
 }
+/* Barra de paciência do cliente */
+#barra-paciencia-container {
+    width: 160px;
+    height: 10px;
+    background-color: rgba(0, 0, 0, 0.35);
+    border: 2px solid #5a4338;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+#barra-paciencia {
+    width: 100%;
+    height: 100%;
+    background-color: #4caf50; /* verde por padrão */
+    transition: width 0.1s linear, background-color 0.3s ease;
+}
+#barra-paciencia.paciencia-media {
+    background-color: #f4a261; /* amarelo/laranja */
+}
+#barra-paciencia.paciencia-baixa {
+    background-color: #e76f51; /* vermelho */
+}
+
 /* Tamanho do personagem */
 #sprite-cliente {
     width: 220px; /* Aumentado para eles não ficarem pequenininhos */
