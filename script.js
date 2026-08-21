@@ -83,9 +83,6 @@ const itensLojinha = [
       pedidosPossiveis: ["Chá", "Chá de Camomila Estelar", "Bolo"],
       recompensa: 30,
       foto: "Gemini_Generated_Image_35y1fw35y1fw35y1.jpg"
-      .fundo-preto {
-  mix-blend-mode: screen;
-}
     }
   },
   {
@@ -101,9 +98,7 @@ const itensLojinha = [
       pedidosPossiveis: ["Café", "Muffin de Mirtilo", "Torta"],
       recompensa: 50,
       foto: "Gemini_Generated_Image_1k7jhe1k7jhe1k7j.jpg"
-      .fundo-branco {
-  mix-blend-mode: multiply;
-}
+    
     }
   }
 ];
