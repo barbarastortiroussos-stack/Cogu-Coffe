@@ -26,6 +26,10 @@ body {
     border: 3px solid #5a4338;
     border-bottom: none;
 }
+.botoes-placar {
+    display: flex;
+    gap: 8px;
+}
 #btn-pause {
     background-color: #e76f51;
     color: white;
@@ -34,6 +38,18 @@ body {
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
+}
+#btn-abrir-loja {
+    background-color: #2a9d8f;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+#btn-abrir-loja:hover {
+    background-color: #21867a;
 }
 .texto-progresso {
     font-size: 12px;
@@ -132,13 +148,16 @@ body {
 /* Container da Lojinha de Melhorias */
 #lojinha {
     width: 800px;
+    max-width: 90vw;
+    max-height: 85vh;
+    overflow-y: auto;
     background-color: #3a2e2b;
     color: #fff;
     padding: 20px;
-    margin-top: 15px;
     border-radius: 12px;
     border: 3px solid #5a4338;
     text-align: center;
+    position: relative;
 }
 #lojinha h2 {
     font-size: 20px;
@@ -153,6 +172,40 @@ body {
 #lojinha .btn-item:hover {
     background-color: #21867a;
 }
+
+/* Loja como modal: fica escondida até o jogador clicar em "Shop" */
+.loja-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 50;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.loja-overlay.ativo {
+  display: flex;
+}
+.btn-fechar-loja {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  background-color: #8c533e;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 1;
+}
+.btn-fechar-loja:hover {
+  background-color: #b56c52;
+}
+
 .painel-loja {
   background-color: #2b1f1d;
   color: #f7e1d7;
