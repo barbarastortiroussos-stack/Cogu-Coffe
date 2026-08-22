@@ -753,7 +753,13 @@ function finalizarDia() {
 }
 
 // Chamado quando o jogador clica em "Start Next Day"
+// Chamado quando o jogador clica em "Start Next Day"
 function avancarProximoDia() {
+  // --- CHAMA O ANÚNCIO DA GAMEDISTRIBUTION ---
+  if (typeof gamedistribution !== 'undefined' && gamedistribution.showAd) {
+    gamedistribution.showAd();
+  }
+
   contadorDias++;
   lucrosDia = 0;
   gastosDia = 0;
@@ -761,7 +767,7 @@ function avancarProximoDia() {
 
   if (fimdiaOverlayElement) fimdiaOverlayElement.classList.remove('ativo');
 
-  renderizarLojinha(); // pode revelar a receita nova do dia que começou agora
+  renderizarLojinha();
   salvarJogo();
   iniciarDia();
 
@@ -830,6 +836,16 @@ function iniciarMusica() {
 
 // Inicia a música no primeiro clique do jogador
 document.addEventListener('click', iniciarMusica, { once: true });
+
+// Gerenciador global de áudio para o SDK da GD controlar
+window.audioManager = {
+  pause: function() {
+    if (musica) musica.pause();
+  },
+  resume: function() {
+    if (musica && !jogoPausado) musica.play().catch(() => {});
+  }
+};
 
 // Inicializações de início de jogo
 carregarJogo();
