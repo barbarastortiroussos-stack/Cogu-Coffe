@@ -15,7 +15,8 @@ body {
 }
 /* Placar de topo */
 #placar {
-    width: 800px;
+    width: 100%;
+    max-width: 800px;
     background-color: #3a2e2b;
     color: #fff;
     padding: 12px 20px;
@@ -57,7 +58,8 @@ body {
 }
 /* Onde a imagem do cenário é aplicada */
 #cenario {
-    width: 800px;
+    width: 100%;
+    max-width: 800px;
     height: 500px;
     background-image: url('cafe-bg.jpg');
     background-size: cover;
@@ -312,4 +314,130 @@ body {
 @keyframes toast-sair {
   from { opacity: 1; transform: translateY(0); }
   to { opacity: 0; transform: translateY(-12px); }
+}
+
+/* ==========================================
+   EFEITOS VISUAIS (GAME FEEL)
+   ========================================== */
+
+/* Texto "+10 🪙" subindo e sumindo perto do cliente */
+.texto-flutuante {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ffd166;
+  font-weight: bold;
+  font-size: 18px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: 10;
+  animation: flutuar-sobe 1s ease-out forwards;
+}
+@keyframes flutuar-sobe {
+  0% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -60px); }
+}
+
+/* Pulso no contador de moedas sempre que ele muda */
+#qtd-moedas.pulso {
+  display: inline-block;
+  animation: pulso-moeda 0.4s ease-out;
+}
+@keyframes pulso-moeda {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.35); color: #ffd166; }
+  100% { transform: scale(1); }
+}
+
+/* Balão de pedido treme quando o jogador erra */
+#balao-pedido.tremendo {
+  animation: tremer 0.35s ease-in-out;
+}
+@keyframes tremer {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* Barra de paciência pulsa quando está no vermelho, reforçando a urgência */
+#barra-paciencia.paciencia-baixa {
+  animation: pulsar-barra 0.6s ease-in-out infinite;
+}
+@keyframes pulsar-barra {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* Partículas (confete de emojis) ao alcançar um marco de recompensa */
+.particula-conquista {
+  position: fixed;
+  left: 50%;
+  top: 35%;
+  font-size: 22px;
+  pointer-events: none;
+  z-index: 998;
+  animation: particula-voar 0.9s ease-out forwards;
+}
+@keyframes particula-voar {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.6); }
+}
+
+/* ==========================================
+   RESPONSIVIDADE (tablets e celulares)
+   ========================================== */
+@media (max-width: 900px) {
+  #placar,
+  #cenario {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+  #placar {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+    padding: 12px 14px;
+  }
+  #placar h1 {
+    font-size: 20px;
+  }
+  .botoes-placar {
+    justify-content: center;
+  }
+  #cenario {
+    height: auto;
+    aspect-ratio: 4 / 5;
+  }
+  #sprite-cliente {
+    width: 150px;
+  }
+  #barra-paciencia-container {
+    width: 130px;
+  }
+  #balao-pedido {
+    font-size: 13px;
+    padding: 8px 14px;
+  }
+  #balcao {
+    gap: 10px;
+    bottom: 16px;
+  }
+  .btn-item {
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+  #lojinha {
+    padding: 14px;
+  }
+  #lojinha h2 {
+    font-size: 17px;
+  }
 }
