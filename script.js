@@ -116,6 +116,7 @@ const barraPacienciaElement = document.getElementById('barra-paciencia');
 const btnAbrirLoja = document.getElementById('btn-abrir-loja');
 const btnFecharLoja = document.getElementById('btn-fechar-loja');
 const lojaOverlayElement = document.getElementById('loja-overlay');
+const areaClienteElement = document.getElementById('area-cliente');
 
 // Tempo que cada cliente espera antes de ir embora, e intervalo de atualização da barra
 const TEMPO_PACIENCIA_MS = 9000;
@@ -252,6 +253,7 @@ function concederRecompensa(marco) {
   }
 
   mostrarToast(marco.mensagem, 'conquista');
+  explodirParticulas();
 }
 
 // Atualiza o textinho de progresso no placar ("faltam X clientes para a próxima recompensa")
@@ -269,10 +271,59 @@ function atualizarProgressoMarco() {
   progressoMarcoElement.innerText = `Customers served: ${contadorClientesAtendidos} — ${faltam} more until the next reward`;
 }
 
+// ==========================================
+// EFEITOS VISUAIS (GAME FEEL)
+// ==========================================
+
+// Mostra um texto subindo e sumindo (ex: "+10 🪙") perto do cliente
+function mostrarTextoFlutuante(texto) {
+  if (!areaClienteElement) return;
+
+  const span = document.createElement('span');
+  span.className = 'texto-flutuante';
+  span.innerText = texto;
+  areaClienteElement.appendChild(span);
+
+  setTimeout(() => span.remove(), 1000);
+}
+
+// Reinicia a animação de "pulso" em um elemento (removendo e forçando reflow antes de reaplicar)
+function reiniciarAnimacao(elemento, classeAnimacao) {
+  if (!elemento) return;
+  elemento.classList.remove(classeAnimacao);
+  void elemento.offsetWidth; // força o navegador a "esquecer" o estado anterior da animação
+  elemento.classList.add(classeAnimacao);
+}
+
+// Balãozinho treme quando o jogador entrega o pedido errado
+function tremerBalao() {
+  reiniciarAnimacao(document.getElementById('balao-pedido'), 'tremendo');
+}
+
+// Chuva de emojis quando um marco de recompensa é alcançado
+function explodirParticulas() {
+  const emojis = ['🎉', '✨', '🪙', '🍄'];
+
+  for (let i = 0; i < 14; i++) {
+    const particula = document.createElement('span');
+    particula.className = 'particula-conquista';
+    particula.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+
+    const angulo = Math.random() * Math.PI * 2;
+    const distancia = 70 + Math.random() * 90;
+    particula.style.setProperty('--dx', `${Math.cos(angulo) * distancia}px`);
+    particula.style.setProperty('--dy', `${Math.sin(angulo) * distancia}px`);
+
+    document.body.appendChild(particula);
+    setTimeout(() => particula.remove(), 900);
+  }
+}
+
 // Atualiza o contador de moedas na tela do jogo e na loja
 function atualizarEconomia() {
   if (qtdMoedasElement) {
     qtdMoedasElement.innerText = moedas;
+    reiniciarAnimacao(qtdMoedasElement, 'pulso');
   }
 }
 
@@ -414,6 +465,7 @@ function entregarPedido(item) {
     moedas += clienteAtual.recompensa;
     contadorClientesAtendidos++;
     atualizarEconomia();
+    mostrarTextoFlutuante(`+${clienteAtual.recompensa} 🪙`);
     verificarMarcos();
     atualizarProgressoMarco();
     salvarJogo();
@@ -429,6 +481,7 @@ function entregarPedido(item) {
     setTimeout(novoCliente, tempoEspera);
   } else {
     // Errou o pedido
+    tremerBalao();
     if (textoPedidoElement) {
       textoPedidoElement.innerText = "Oops! That's not what I ordered...";
     }
