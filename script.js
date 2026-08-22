@@ -83,7 +83,7 @@ const itensLojinha = [
       nome: "Luminous Fairy",
       pedidosPossiveis: ["Tea", "Starlight Chamomile Tea", "Cake"],
       recompensa: 30,
-      foto: "Gemini_Generated_Image_35y1fw35y1fw35y1.jpg"
+      foto: "luminous-fairy.png"
     }
   },
   {
@@ -98,7 +98,7 @@ const itensLojinha = [
       nome: "Elder Gnome",
       pedidosPossiveis: ["Coffee", "Blueberry Muffin", "Pie"],
       recompensa: 50,
-      foto: "Gemini_Generated_Image_1k7jhe1k7jhe1k7j.jpg"
+      foto: "elder-gnome.png"
     }
   }
 ];
