@@ -5,6 +5,7 @@ let moedas = 0;
 let clienteAtual = null;
 let jogoPausado = false;
 let lojaAberta = false;
+let diaTerminado = false;
 
 let nivelCafeteira = 1;
 let precoUpgrade = 50;
@@ -41,6 +42,7 @@ let clientes = [];
 // Lista de Itens/Upgrades da Lojinha
 const itensLojinha = [
   // --- CARDÁPIO ---
+  // "diaLiberacao" = a partir de qual dia esse item aparece como comprável na loja
   {
     id: "muffin_cogumelo",
     nome: "Blueberry Muffin",
@@ -48,7 +50,8 @@ const itensLojinha = [
     preco: 50,
     comprado: false,
     descricao: "A fluffy sweet treat that gets added to the order menu!",
-    icone: "🧁"
+    icone: "🧁",
+    diaLiberacao: 1
   },
   {
     id: "cha_estelar",
@@ -57,7 +60,8 @@ const itensLojinha = [
     preco: 80,
     comprado: false,
     descricao: "A relaxing drink added to the possible orders.",
-    icone: "🍵"
+    icone: "🍵",
+    diaLiberacao: 2
   },
   {
     id: "cha_cogumelos",
@@ -103,6 +107,16 @@ const itensLojinha = [
   }
 ];
 
+// Frases mostradas aleatoriamente na tela de fim de dia
+const FRASES_MOTIVADORAS = [
+  "Every cup you serve makes the village a little cozier! ☕",
+  "You're brewing more than coffee — you're brewing joy!",
+  "Another wonderful day at Cogu Coffee. See you tomorrow!",
+  "The village smiles because of you. Great work today!",
+  "Small cups, big smiles. Keep it up!",
+  "Rain or shine, Cogu Coffee always feels like home."
+];
+
 // ==========================================
 // 2. REFERÊNCIAS DO HTML (DOM)
 // ==========================================
@@ -110,7 +124,6 @@ const qtdMoedasElement = document.getElementById('qtd-moedas');
 const textoPedidoElement = document.getElementById('texto-pedido');
 const btnPause = document.getElementById('btn-pause');
 const musica = document.getElementById('musica-fundo');
-const balcaoElement = document.getElementById('balcao');
 const barraPacienciaElement = document.getElementById('barra-paciencia');
 
 const btnAbrirLoja = document.getElementById('btn-abrir-loja');
@@ -118,12 +131,42 @@ const btnFecharLoja = document.getElementById('btn-fechar-loja');
 const lojaOverlayElement = document.getElementById('loja-overlay');
 const areaClienteElement = document.getElementById('area-cliente');
 
+// Balcão em carrossel (um pedido por vez, com setas)
+const pedidoAtualBalcaoElement = document.getElementById('pedido-atual-balcao');
+const setaEsquerdaElement = document.getElementById('seta-esquerda-balcao');
+const setaDireitaElement = document.getElementById('seta-direita-balcao');
+let indiceBalcaoAtual = 0;
+
+// Barra e textos do dia
+const textoDiaElement = document.getElementById('texto-dia');
+const barraDiaElement = document.getElementById('barra-dia');
+
+// Tela de fim de dia
+const fimdiaOverlayElement = document.getElementById('fimdia-overlay');
+const fimdiaTituloElement = document.getElementById('fimdia-titulo');
+const fimdiaLucrosElement = document.getElementById('fimdia-lucros');
+const fimdiaGastosElement = document.getElementById('fimdia-gastos');
+const fimdiaSaldoElement = document.getElementById('fimdia-saldo');
+const fimdiaReceitaElement = document.getElementById('fimdia-receita');
+const fimdiaFraseElement = document.getElementById('fimdia-frase');
+const btnProximoDia = document.getElementById('btn-proximo-dia');
+
 // Tempo que cada cliente espera antes de ir embora, e intervalo de atualização da barra
 const TEMPO_PACIENCIA_MS = 9000;
 const INTERVALO_TICK_PACIENCIA_MS = 100;
 
 let tempoRestantePaciencia = 0;
 let intervaloPaciencia = null;
+
+// Duração de um "dia" (uma partida) e intervalo de atualização da barra de dia
+const TEMPO_DIA_MS = 120000; // 2 minutos por dia — ajuste aqui se quiser dias mais curtos/longos
+const INTERVALO_TICK_DIA_MS = 200;
+
+let contadorDias = 1;
+let lucrosDia = 0;
+let gastosDia = 0;
+let tempoRestanteDia = 0;
+let intervaloDia = null;
 
 // ==========================================
 // SISTEMA DE MARCOS DE RECOMPENSA (ENGAJAMENTO)
@@ -150,7 +193,10 @@ function salvarJogo() {
     precoUpgrade,
     itensComprados: itensLojinha.filter(i => i.comprado).map(i => i.id),
     contadorClientesAtendidos,
-    marcosResgatados
+    marcosResgatados,
+    contadorDias,
+    lucrosDia,
+    gastosDia
   };
 
   try {
@@ -180,6 +226,9 @@ function carregarJogo() {
   precoUpgrade = dadosSalvos.precoUpgrade ?? 50;
   contadorClientesAtendidos = dadosSalvos.contadorClientesAtendidos ?? 0;
   marcosResgatados = dadosSalvos.marcosResgatados ?? [];
+  contadorDias = dadosSalvos.contadorDias ?? 1;
+  lucrosDia = dadosSalvos.lucrosDia ?? 0;
+  gastosDia = dadosSalvos.gastosDia ?? 0;
 
   const idsComprados = new Set(dadosSalvos.itensComprados || []);
 
@@ -241,6 +290,7 @@ function verificarMarcos() {
 function concederRecompensa(marco) {
   if (marco.tipo === 'moedas') {
     moedas += marco.valor;
+    lucrosDia += marco.valor;
     atualizarEconomia();
   } else if (marco.tipo === 'item') {
     const item = itensLojinha.find(i => i.id === marco.itemId);
@@ -346,24 +396,55 @@ function obterIconePedido(nomePedido) {
   return "🍽️";
 }
 
-// Redesenha os botões do balcão com base nos pedidos desbloqueados no momento
+// ==========================================
+// BALCÃO EM CARROSSEL (um pedido por vez + setas)
+// ==========================================
+
+// Redesenha o botão do pedido atualmente visível no carrossel
 function renderizarBalcao() {
-  if (!balcaoElement) return;
+  if (!pedidoAtualBalcaoElement) return;
 
-  balcaoElement.innerHTML = "";
+  const pedidos = obterPedidosDesbloqueados();
+  pedidoAtualBalcaoElement.innerHTML = "";
 
-  obterPedidosDesbloqueados().forEach(pedido => {
-    const botao = document.createElement('button');
-    botao.className = 'btn-item';
-    botao.innerText = `${obterIconePedido(pedido)} ${pedido}`;
-    botao.addEventListener('click', () => entregarPedido(pedido));
-    balcaoElement.appendChild(botao);
-  });
+  if (pedidos.length === 0) return;
+
+  if (indiceBalcaoAtual >= pedidos.length) indiceBalcaoAtual = 0;
+
+  const pedido = pedidos[indiceBalcaoAtual];
+
+  const botao = document.createElement('button');
+  botao.className = 'btn-item';
+  botao.innerText = `${obterIconePedido(pedido)} ${pedido}`;
+  botao.addEventListener('click', () => entregarPedido(pedido));
+  pedidoAtualBalcaoElement.appendChild(botao);
 }
+
+// Navega para o pedido anterior (-1) ou próximo (+1) do carrossel
+function avancarBalcao(direcao) {
+  const pedidos = obterPedidosDesbloqueados();
+  if (pedidos.length === 0) return;
+
+  indiceBalcaoAtual = (indiceBalcaoAtual + direcao + pedidos.length) % pedidos.length;
+  renderizarBalcao();
+}
+
+if (setaEsquerdaElement) {
+  setaEsquerdaElement.addEventListener('click', () => avancarBalcao(-1));
+}
+if (setaDireitaElement) {
+  setaDireitaElement.addEventListener('click', () => avancarBalcao(1));
+}
+
+// As setas do teclado (← →) fazem exatamente o mesmo que as setas touch
+document.addEventListener('keydown', (evento) => {
+  if (evento.key === 'ArrowLeft') avancarBalcao(-1);
+  if (evento.key === 'ArrowRight') avancarBalcao(1);
+});
 
 // Função para Gerar um Novo Cliente
 function novoCliente() {
-  if (jogoPausado) return;
+  if (jogoPausado || diaTerminado) return;
 
   const indiceCliente = Math.floor(Math.random() * clientes.length);
   clienteAtual = clientes[indiceCliente];
@@ -393,7 +474,7 @@ function iniciarPaciencia() {
   atualizarBarraPaciencia();
 
   intervaloPaciencia = setInterval(() => {
-    if (jogoPausado || lojaAberta) return; // não desconta paciência pausado ou com a loja aberta
+    if (jogoPausado || lojaAberta || diaTerminado) return; // não desconta paciência pausado/loja aberta/fim de dia
 
     tempoRestantePaciencia -= INTERVALO_TICK_PACIENCIA_MS;
     atualizarBarraPaciencia();
@@ -443,7 +524,9 @@ function clientePerdeuPaciencia() {
 // Função para Comprar Melhoria na Cafeteira
 function comprarUpgrade() {
   if (moedas >= precoUpgrade) {
-    moedas -= precoUpgrade;
+    const custo = precoUpgrade;
+    moedas -= custo;
+    gastosDia += custo;
     nivelCafeteira++;
     precoUpgrade *= 2; // O próximo upgrade fica mais caro
 
@@ -457,12 +540,13 @@ function comprarUpgrade() {
 
 // Função para Processar a Entrega do Pedido
 function entregarPedido(item) {
-  if (jogoPausado || !clienteAtual) return;
+  if (jogoPausado || lojaAberta || diaTerminado || !clienteAtual) return;
 
   if (item === clienteAtual.pedido) {
     // Acertou o pedido!
     pararPaciencia();
     moedas += clienteAtual.recompensa;
+    lucrosDia += clienteAtual.recompensa;
     contadorClientesAtendidos++;
     atualizarEconomia();
     mostrarTextoFlutuante(`+${clienteAtual.recompensa} 🪙`);
@@ -504,6 +588,7 @@ function comprarItem(idItem) {
 
   if (moedas >= item.preco) {
     moedas -= item.preco;
+    gastosDia += item.preco;
     item.comprado = true;
 
     atualizarEconomia();
@@ -536,6 +621,11 @@ function desbloquearConteudoJogo(item) {
   }
 }
 
+// Um item de cardápio só aparece na loja a partir do dia configurado em "diaLiberacao"
+function itemDisponivelHoje(item) {
+  return item.diaLiberacao === undefined || item.diaLiberacao <= contadorDias;
+}
+
 function renderizarLojinha() {
   const container = document.getElementById("container-itens-loja");
   if (!container) return;
@@ -543,7 +633,7 @@ function renderizarLojinha() {
   container.innerHTML = ""; // Limpa a lista antes de redesenhar
 
   itensLojinha
-    .filter(item => !item.ocultoNaLoja || item.comprado)
+    .filter(item => (!item.ocultoNaLoja || item.comprado) && itemDisponivelHoje(item))
     .forEach(item => {
     const card = document.createElement("div");
     card.className = `card-item ${item.comprado ? 'item-comprado' : ''}`;
@@ -568,6 +658,7 @@ function renderizarLojinha() {
 // ==========================================
 
 function abrirLoja() {
+  if (diaTerminado) return;
   lojaAberta = true;
   if (lojaOverlayElement) lojaOverlayElement.classList.add('ativo');
 }
@@ -595,7 +686,95 @@ if (lojaOverlayElement) {
 }
 
 // ==========================================
-// 8. EVENTOS E INICIALIZAÇÃO
+// 8. SISTEMA DE DIA (TIMER DE PARTIDA + TELA DE FIM DE DIA)
+// ==========================================
+
+function iniciarDia() {
+  pararDia();
+  tempoRestanteDia = TEMPO_DIA_MS;
+  atualizarBarraDia();
+
+  if (textoDiaElement) textoDiaElement.innerText = `Day ${contadorDias}`;
+
+  intervaloDia = setInterval(() => {
+    if (jogoPausado || lojaAberta || diaTerminado) return;
+
+    tempoRestanteDia -= INTERVALO_TICK_DIA_MS;
+    atualizarBarraDia();
+
+    if (tempoRestanteDia <= 0) {
+      finalizarDia();
+    }
+  }, INTERVALO_TICK_DIA_MS);
+}
+
+function pararDia() {
+  if (intervaloDia) {
+    clearInterval(intervaloDia);
+    intervaloDia = null;
+  }
+}
+
+function atualizarBarraDia() {
+  if (!barraDiaElement) return;
+  const porcentagem = Math.max(0, (tempoRestanteDia / TEMPO_DIA_MS) * 100);
+  barraDiaElement.style.width = `${porcentagem}%`;
+}
+
+// Encerra o dia atual e mostra a tela de resumo
+function finalizarDia() {
+  pararDia();
+  pararPaciencia();
+  diaTerminado = true;
+
+  // A receita de cardápio que passou a ficar disponível justamente hoje
+  const receitaDoDia = itensLojinha.find(
+    item => item.tipo === 'cardapio' && !item.ocultoNaLoja && item.diaLiberacao === contadorDias
+  );
+
+  if (fimdiaTituloElement) fimdiaTituloElement.innerText = `Day ${contadorDias} Complete!`;
+  if (fimdiaLucrosElement) fimdiaLucrosElement.innerText = `🪙 ${lucrosDia}`;
+  if (fimdiaGastosElement) fimdiaGastosElement.innerText = `🪙 ${gastosDia}`;
+  if (fimdiaSaldoElement) fimdiaSaldoElement.innerText = `🪙 ${lucrosDia - gastosDia}`;
+
+  if (fimdiaReceitaElement) {
+    fimdiaReceitaElement.innerText = receitaDoDia
+      ? `🍽️ New recipe available in the shop: ${receitaDoDia.nome}!`
+      : "No new recipe today — check back tomorrow!";
+  }
+
+  if (fimdiaFraseElement) {
+    fimdiaFraseElement.innerText = FRASES_MOTIVADORAS[Math.floor(Math.random() * FRASES_MOTIVADORAS.length)];
+  }
+
+  if (fimdiaOverlayElement) fimdiaOverlayElement.classList.add('ativo');
+
+  salvarJogo();
+}
+
+// Chamado quando o jogador clica em "Start Next Day"
+function avancarProximoDia() {
+  contadorDias++;
+  lucrosDia = 0;
+  gastosDia = 0;
+  diaTerminado = false;
+
+  if (fimdiaOverlayElement) fimdiaOverlayElement.classList.remove('ativo');
+
+  renderizarLojinha(); // pode revelar a receita nova do dia que começou agora
+  salvarJogo();
+  iniciarDia();
+
+  clienteAtual = null;
+  novoCliente();
+}
+
+if (btnProximoDia) {
+  btnProximoDia.addEventListener('click', avancarProximoDia);
+}
+
+// ==========================================
+// 9. EVENTOS E INICIALIZAÇÃO
 // ==========================================
 
 // Botão de Pause
@@ -658,4 +837,5 @@ renderizarLojinha();
 renderizarBalcao();
 atualizarEconomia();
 atualizarProgressoMarco();
+iniciarDia();
 novoCliente(); // Inicia o primeiro cliente assim que o jogo abre
