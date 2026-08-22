@@ -19,6 +19,15 @@
       <button id="btn-pause">Pause</button>
     </div>
   </div>
+
+  <!-- BARRA DE DIA (timer da partida) -->
+  <div id="barra-dia-container">
+    <span id="texto-dia">Day 1</span>
+    <div class="trilho-barra-dia">
+      <div id="barra-dia"></div>
+    </div>
+  </div>
+
   <!-- 2. CENÁRIO E ÁREA DO CLIENTE -->
   <div id="cenario">
     
@@ -31,9 +40,12 @@
       </div>
       <img id="sprite-cliente" src="customer-1.png" alt="Customer">
     </div>
-    <!-- BALCÃO COM BOTÕES DE ENTREGA DE PEDIDOS -->
-    <!-- Os botões são gerados dinamicamente pelo script.js, com base nos pedidos desbloqueados -->
-    <div id="balcao"></div>
+    <!-- BALCÃO EM CARROSSEL: um pedido por vez, com setas de navegação -->
+    <div id="balcao">
+      <button id="seta-esquerda-balcao" class="seta-balcao" aria-label="Previous order">‹</button>
+      <div id="pedido-atual-balcao"></div>
+      <button id="seta-direita-balcao" class="seta-balcao" aria-label="Next order">›</button>
+    </div>
   </div>
 
   <!-- 3. LOJA COMO MODAL (fica escondida até o jogador clicar em "Shop") -->
@@ -45,6 +57,31 @@
 
       <!-- É AQUI QUE O JAVASCRIPT DESENHA OS CARDS -->
       <div id="container-itens-loja" class="grid-loja"></div>
+    </div>
+  </div>
+
+  <!-- 4. TELA DE FIM DE DIA (modal com resumo da partida) -->
+  <div id="fimdia-overlay" class="loja-overlay">
+    <div class="painel-fimdia" id="painel-fimdia">
+      <h2 id="fimdia-titulo">Day 1 Complete!</h2>
+
+      <div class="fimdia-linha">
+        <span>Profits</span>
+        <strong id="fimdia-lucros">🪙 0</strong>
+      </div>
+      <div class="fimdia-linha">
+        <span>Expenses</span>
+        <strong id="fimdia-gastos">🪙 0</strong>
+      </div>
+      <div class="fimdia-linha fimdia-saldo">
+        <span>Net</span>
+        <strong id="fimdia-saldo">🪙 0</strong>
+      </div>
+
+      <p id="fimdia-receita" class="fimdia-receita"></p>
+      <p id="fimdia-frase" class="fimdia-frase"></p>
+
+      <button id="btn-proximo-dia" class="btn-proximo-dia">Start Next Day ▶</button>
     </div>
   </div>
 
