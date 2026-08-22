@@ -56,6 +56,35 @@ body {
     font-size: 12px;
     opacity: 0.8;
 }
+
+/* Barra de progresso do dia (timer da partida) */
+#barra-dia-container {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #3a2e2b;
+    color: #f4a261;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 6px 16px;
+    border-left: 3px solid #5a4338;
+    border-right: 3px solid #5a4338;
+}
+.trilho-barra-dia {
+    flex: 1;
+    height: 8px;
+    background-color: rgba(0, 0, 0, 0.35);
+    border-radius: 4px;
+    overflow: hidden;
+}
+#barra-dia {
+    width: 100%;
+    height: 100%;
+    background-color: #e9c46a;
+    transition: width 0.2s linear;
+}
 /* Onde a imagem do cenário é aplicada */
 #cenario {
     width: 100%;
@@ -128,11 +157,33 @@ body {
     bottom: 30px;
     width: 100%;
     display: flex;
+    align-items: center;
     justify-content: center;
-    flex-wrap: wrap;
     gap: 20px;
     padding: 0 20px;
     z-index: 3;
+}
+.seta-balcao {
+    background-color: #8c533e;
+    color: #fff;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.1s, background-color 0.15s;
+}
+.seta-balcao:hover {
+    background-color: #b56c52;
+    transform: scale(1.08);
+}
+#pedido-atual-balcao {
+    display: flex;
+    justify-content: center;
+    min-width: 140px;
 }
 .btn-item {
     background-color: #f4a261;
@@ -215,6 +266,61 @@ body {
   border-radius: 12px;
   max-width: 600px;
   margin: 0 auto;
+}
+
+/* Painel de fim de dia (usa o mesmo .loja-overlay como fundo escurecido) */
+.painel-fimdia {
+  background: linear-gradient(160deg, #3a2e2b, #2b1f1d);
+  color: #f7e1d7;
+  padding: 28px 24px;
+  border-radius: 14px;
+  border: 3px solid #e9c46a;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+}
+.painel-fimdia h2 {
+  color: #f4a261;
+  margin-bottom: 16px;
+  font-size: 22px;
+}
+.fimdia-linha {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  padding: 6px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.fimdia-saldo {
+  font-weight: bold;
+  color: #e9c46a;
+  border-bottom: none;
+  margin-top: 4px;
+}
+.fimdia-receita {
+  margin-top: 14px;
+  font-size: 14px;
+  color: #90e0c8;
+}
+.fimdia-frase {
+  margin-top: 10px;
+  font-style: italic;
+  font-size: 13px;
+  opacity: 0.85;
+}
+.btn-proximo-dia {
+  margin-top: 20px;
+  background-color: #2a9d8f;
+  color: white;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+}
+.btn-proximo-dia:hover {
+  background-color: #21867a;
 }
 .grid-loja {
   display: grid;
@@ -439,5 +545,23 @@ body {
   }
   #lojinha h2 {
     font-size: 17px;
+  }
+  #barra-dia-container {
+    padding: 5px 12px;
+    font-size: 11px;
+  }
+  .seta-balcao {
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+  }
+  #pedido-atual-balcao {
+    min-width: 110px;
+  }
+  .painel-fimdia {
+    padding: 20px 16px;
+  }
+  .painel-fimdia h2 {
+    font-size: 18px;
   }
 }
