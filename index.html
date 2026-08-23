@@ -5,6 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cogu Coffee - Mushroom Village</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- SDK GameDistribution (Carrega no HEAD com o seu Game ID correto) -->
+  <script type="text/javascript">
+    window["GD_OPTIONS"] = {
+      "gameId": "5a40f6aa8d2c4e959e456f851258987f",
+      "onEvent": function(event) {
+        switch (event.name) {
+          case "SDK_GAME_START":
+            if (window.audioManager) window.audioManager.resume();
+            break;
+          case "SDK_GAME_PAUSE":
+            if (window.audioManager) window.audioManager.pause();
+            break;
+        }
+      },
+    };
+    (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = 'https://html5.api.gamedistribution.com/main.min.js';
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'gamedistribution-jssdk'));
+  </script>
 </head>
 <body>
   <!-- 1. PLACAR DO JOGO -->
@@ -30,7 +54,6 @@
 
   <!-- 2. CENÁRIO E ÁREA DO CLIENTE -->
   <div id="cenario">
-    
     <div id="area-cliente">
       <div id="balao-pedido">
         <span id="texto-pedido">Loading order...</span>
@@ -40,7 +63,8 @@
       </div>
       <img id="sprite-cliente" src="customer-1.png" alt="Customer">
     </div>
-    <!-- BALCÃO EM CARROSSEL: um pedido por vez, com setas de navegação -->
+
+    <!-- BALCÃO EM CARROSSEL -->
     <div id="balcao">
       <button id="seta-esquerda-balcao" class="seta-balcao" aria-label="Previous order">‹</button>
       <div id="pedido-atual-balcao"></div>
@@ -48,19 +72,17 @@
     </div>
   </div>
 
-  <!-- 3. LOJA COMO MODAL (fica escondida até o jogador clicar em "Shop") -->
+  <!-- 3. LOJA COMO MODAL -->
   <div id="loja-overlay" class="loja-overlay">
     <div class="painel-loja" id="lojinha">
       <button id="btn-fechar-loja" class="btn-fechar-loja" aria-label="Close shop">✕</button>
       <h2>🏪 Mushroom Village Shop</h2>
       <p style="margin-bottom: 10px;">Buy recipes and attract new customers to the café!</p>
-
-      <!-- É AQUI QUE O JAVASCRIPT DESENHA OS CARDS -->
       <div id="container-itens-loja" class="grid-loja"></div>
     </div>
   </div>
 
-  <!-- 4. TELA DE FIM DE DIA (modal com resumo da partida) -->
+  <!-- 4. TELA DE FIM DE DIA -->
   <div id="fimdia-overlay" class="loja-overlay">
     <div class="painel-fimdia" id="painel-fimdia">
       <h2 id="fimdia-titulo">Day 1 Complete!</h2>
@@ -87,32 +109,8 @@
 
   <!-- Elemento de Áudio para Música de Fundo -->
   <audio id="musica-fundo" src="vibehorn-lo-fi-music-romantic-jazzy-love-479215.mp3" loop></audio>
-  <!-- Script do Jogo -->
-  <script src="script.js"></script>
 
-  <script>
-  window["GD_OPTIONS"] = {
-    "gameId": "5a40f6aa8d2c4e959e456f851258987f",
-    "onEvent": function(event) {
-      switch (event.name) {
-        case "SDK_GAME_START":
-          // O anúncio acabou ou não carregou: retoma a música/som do jogo
-          if (window.audioManager) window.audioManager.resume();
-          break;
-        case "SDK_GAME_PAUSE":
-          // O anúncio começou: pausa a música do jogo
-          if (window.audioManager) window.audioManager.pause();
-          break;
-      }
-    },
-  };
-  (function(d, s, id) {
-      var js, fjs = d.getElementsByTagName(s)[0];
-      if (d.getElementById(id)) return;
-      js = d.createElement(s); js.id = id;
-      js.src = 'https://html5.api.gamedistribution.com/main.min.js';
-      fjs.parentNode.insertBefore(js, fjs);
-  }(document, 'script', 'gamedistribution-jssdk'));
-</script>
+  <!-- Script Principal do Jogo (No final do body para carregar o DOM primeiro) -->
+  <script src="script.js"></script>
 </body>
 </html>
