@@ -1502,23 +1502,21 @@ function finalizarDia() {
 // ==========================================
 // INTEGRAÇÃO COM SDK GAMEDISTRIBUTION
 // ==========================================
+// ==========================================
+// INTEGRAÇÃO COM SDK GAMEDISTRIBUTION
+// ==========================================
 function chamarAnuncioGD(callbackAoFechar) {
   if (typeof gamedistribution !== 'undefined' && typeof gamedistribution.showAd === 'function') {
-    // Pausa o jogo e o áudio antes do anúncio abrir
     definirPausa(true, true);
     if (window.audioManager) window.audioManager.pause();
 
     gamedistribution.showAd()
-      .then(() => {
-        // Anúncio finalizado com sucesso
-        retomarAposAnuncio(callbackAoFechar);
-      })
+      .then(() => retomarAposAnuncio(callbackAoFechar))
       .catch((erro) => {
         console.log("Erro ou adblock no anúncio:", erro);
         retomarAposAnuncio(callbackAoFechar);
       });
   } else if (typeof GD_SDK !== 'undefined' && typeof GD_SDK.showAd === 'function') {
-    // Fallback para a versão GD_SDK
     definirPausa(true, true);
     if (window.audioManager) window.audioManager.pause();
 
@@ -1526,7 +1524,6 @@ function chamarAnuncioGD(callbackAoFechar) {
       .then(() => retomarAposAnuncio(callbackAoFechar))
       .catch(() => retomarAposAnuncio(callbackAoFechar));
   } else {
-    // Se não houver SDK carregado (ex: teste local), continua o jogo direto
     callbackAoFechar();
   }
 }
@@ -1558,165 +1555,82 @@ function avancarProximoDia() {
   });
 }
 
-
-
 if (btnProximoDia) {
-
   btnProximoDia.addEventListener('click', avancarProximoDia);
-
 }
 
-
-
 // ==========================================
-
 // 9. EVENTOS E INICIALIZAÇÃO
-
 // ==========================================
-
-
 
 // Botão de Pause
-
-let pausadoManualmente = false; // controla se foi o JOGADOR quem pausou (pra não "despausar" sozinho)
-
-
+let pausadoManualmente = false;
 
 function definirPausa(pausar, porTrocaDeAba = false) {
-
   if (!porTrocaDeAba) pausadoManualmente = pausar;
 
-
-
   jogoPausado = pausar;
-
   if (btnPause) {
-
     btnPause.innerText = jogoPausado ? "Continue" : "Pause";
-
   }
-
   if (musica) {
-
     if (jogoPausado) musica.pause();
-
     else musica.play().catch(() => {});
-
   }
-
 }
-
-
 
 if (btnPause) {
-
   btnPause.addEventListener('click', () => {
-
     definirPausa(!jogoPausado);
-
   });
-
 }
 
-
-
-// Pausa automaticamente quando o jogador troca de aba/minimiza (recomendado por Poki/CrazyGames)
-
-// e retoma sozinho ao voltar — mas só se o jogador não tinha pausado manualmente antes
-
+// Pausa ao trocar de aba/minimizar
 document.addEventListener('visibilitychange', () => {
-
   if (document.hidden) {
-
     definirPausa(true, true);
-
   } else if (!pausadoManualmente) {
-
     definirPausa(false, true);
-
   }
-
 });
 
-
-
 // Salva o progresso automaticamente antes de fechar a aba
-
 window.addEventListener('beforeunload', salvarJogo);
 
-
-
 // Música de Fundo
-
 function iniciarMusica() {
-
   if (musica) {
-
-    musica.volume = 0.25; // Volume a 25%
-
-
+    musica.volume = 0.25;
 
     musica.onended = () => {
-
       musica.currentTime = 0;
-
       musica.play();
-
     };
 
-
-
     musica.play().catch(erro => {
-
       console.log("Aguardando interação para tocar o som:", erro);
-
     });
-
   }
-
 }
 
-
-
 // Inicia a música no primeiro clique do jogador
-
 document.addEventListener('click', iniciarMusica, { once: true });
 
-
-
 // Gerenciador global de áudio para o SDK da GD controlar
-
 window.audioManager = {
-
   pause: function() {
-
     if (musica) musica.pause();
-
   },
-
   resume: function() {
-
     if (musica && !jogoPausado) musica.play().catch(() => {});
-
   }
-
 };
 
-
-
 // Inicializações de início de jogo
-
 carregarJogo();
-
 renderizarLojinha();
-
 renderizarBalcao();
-
 atualizarEconomia();
-
 atualizarProgressoMarco();
-
 iniciarDia();
-
-novoCliente(); // Inicia o primeiro cliente assim que o jogo abre 
-
+novoCliente();
