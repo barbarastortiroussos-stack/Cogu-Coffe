@@ -1502,28 +1502,25 @@ function finalizarDia() {
 // ==========================================
 // INTEGRAÇÃO COM SDK GAMEDISTRIBUTION
 // ==========================================
-// ==========================================
-// INTEGRAÇÃO COM SDK GAMEDISTRIBUTION
-// ==========================================
 function chamarAnuncioGD(callbackAoFechar) {
+  // A GameDistribution injeta a variável global 'gamedistribution'
   if (typeof gamedistribution !== 'undefined' && typeof gamedistribution.showAd === 'function') {
     definirPausa(true, true);
     if (window.audioManager) window.audioManager.pause();
 
-    gamedistribution.showAd()
-      .then(() => retomarAposAnuncio(callbackAoFechar))
+    // Dispara o anúncio comercial oficial da GD
+    gamedistribution.showAd(gamedistribution.commercial)
+      .then(() => {
+        console.log("Anúncio exibido com sucesso");
+        retomarAposAnuncio(callbackAoFechar);
+      })
       .catch((erro) => {
-        console.log("Erro ou adblock no anúncio:", erro);
+        console.log("Anúncio não disponível ou bloqueado:", erro);
         retomarAposAnuncio(callbackAoFechar);
       });
-  } else if (typeof GD_SDK !== 'undefined' && typeof GD_SDK.showAd === 'function') {
-    definirPausa(true, true);
-    if (window.audioManager) window.audioManager.pause();
-
-    GD_SDK.showAd()
-      .then(() => retomarAposAnuncio(callbackAoFechar))
-      .catch(() => retomarAposAnuncio(callbackAoFechar));
   } else {
+    // Se o SDK não respondeu, segue o jogo normalmente
+    console.log("SDK da GD não encontrado no momento da chamada");
     callbackAoFechar();
   }
 }
