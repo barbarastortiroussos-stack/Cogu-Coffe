@@ -490,15 +490,10 @@ let containerToasts = null;
 
 
 function garantirContainerToasts() {
-
   if (containerToasts) return containerToasts;
 
-
-
   containerToasts = document.createElement('div');
-
   containerToasts.id = 'container-toasts';
-
   document.body.appendChild(containerToasts);
 
   return containerToasts;
@@ -1504,45 +1499,63 @@ function finalizarDia() {
 // Chamado quando o jogador clica em "Start Next Day"
 
 // Chamado quando o jogador clica em "Start Next Day"
+// ==========================================
+// INTEGRAÇÃO COM SDK GAMEDISTRIBUTION
+// ==========================================
+function chamarAnuncioGD(callbackAoFechar) {
+  if (typeof gamedistribution !== 'undefined' && typeof gamedistribution.showAd === 'function') {
+    // Pausa o jogo e o áudio antes do anúncio abrir
+    definirPausa(true, true);
+    if (window.audioManager) window.audioManager.pause();
 
-function avancarProximoDia() {
+    gamedistribution.showAd()
+      .then(() => {
+        // Anúncio finalizado com sucesso
+        retomarAposAnuncio(callbackAoFechar);
+      })
+      .catch((erro) => {
+        console.log("Erro ou adblock no anúncio:", erro);
+        retomarAposAnuncio(callbackAoFechar);
+      });
+  } else if (typeof GD_SDK !== 'undefined' && typeof GD_SDK.showAd === 'function') {
+    // Fallback para a versão GD_SDK
+    definirPausa(true, true);
+    if (window.audioManager) window.audioManager.pause();
 
-  // --- CHAMA O ANÚNCIO DA GAMEDISTRIBUTION ---
-
-  if (typeof gamedistribution !== 'undefined' && gamedistribution.showAd) {
-
-    gamedistribution.showAd();
-
+    GD_SDK.showAd()
+      .then(() => retomarAposAnuncio(callbackAoFechar))
+      .catch(() => retomarAposAnuncio(callbackAoFechar));
+  } else {
+    // Se não houver SDK carregado (ex: teste local), continua o jogo direto
+    callbackAoFechar();
   }
+}
 
+function retomarAposAnuncio(callback) {
+  definirPausa(false, true);
+  if (window.audioManager) window.audioManager.resume();
+  if (callback) callback();
+}
 
+// ==========================================
+// AÇÃO DE PRÓXIMO DIA COM ANÚNCIO
+// ==========================================
+function avancarProximoDia() {
+  chamarAnuncioGD(() => {
+    contadorDias++;
+    lucrosDia = 0;
+    gastosDia = 0;
+    diaTerminado = false;
 
-  contadorDias++;
+    if (fimdiaOverlayElement) fimdiaOverlayElement.classList.remove('ativo');
 
-  lucrosDia = 0;
+    renderizarLojinha();
+    salvarJogo();
+    iniciarDia();
 
-  gastosDia = 0;
-
-  diaTerminado = false;
-
-
-
-  if (fimdiaOverlayElement) fimdiaOverlayElement.classList.remove('ativo');
-
-
-
-  renderizarLojinha();
-
-  salvarJogo();
-
-  iniciarDia();
-
-
-
-  clienteAtual = null;
-
-  novoCliente();
-
+    clienteAtual = null;
+    novoCliente();
+  });
 }
 
 
