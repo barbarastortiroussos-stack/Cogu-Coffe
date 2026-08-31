@@ -1,7 +1,5 @@
 // ==========================================
-
 // 1. ESTADO DO JOGO (VARIÁVEIS PRINCIPAIS)
-
 // ==========================================
 
 let moedas = 0;
@@ -10,113 +8,70 @@ let jogoPausado = false;
 let lojaAberta = false;
 let diaTerminado = false;
 
-
-
 let nivelCafeteira = 1;
 let precoUpgrade = 50;
 
-
-
 const CHAVE_SAVE = "coguCoffeeSave";
-
-
 
 // Lista Inicial de Clientes da Vila Cogumelo (fonte da verdade — nunca é alterada)
 
 const CLIENTES_BASE = [
 
   {
-
     nome: "Mossling",
-
     pedidosPossiveis: ["Tea", "Cake"],
-
     recompensa: 10,
-
     foto: "customer-2.png"
-
   },
 
   {
-
     nome: "Cherryling",
-
     pedidosPossiveis: ["Coffee", "Pie", "Cake"],
-
     recompensa: 15,
-
     foto: "customer-1.png"
-
   }
 
 ];
-
-
 
 // Ícones dos pedidos "de base" (os que já vinham fixos no balcão)
 
 const ICONES_PEDIDOS_BASE = {
 
   "Coffee": "☕",
-
   "Tea": "🍵",
-
   "Cake": "🍰",
-
   "Pie": "🥧"
-
 };
 
-
-
 // Lista de clientes atualmente ativos no jogo (recalculada a partir de CLIENTES_BASE + compras)
-
 let clientes = [];
 
-
-
 // Lista de Itens/Upgrades da Lojinha
-
 const itensLojinha = [
-
   // --- CARDÁPIO ---
-
   // "diaLiberacao" = a partir de qual dia esse item aparece como comprável na loja
 
   {
 
     id: "muffin_cogumelo",
-
     nome: "Blueberry Muffin",
-
     tipo: "cardapio",
-
     preco: 50,
 
     comprado: false,
-
     descricao: "A fluffy sweet treat that gets added to the order menu!",
-
     icone: "🧁",
-
     diaLiberacao: 1
-
   },
 
   {
 
     id: "cha_estelar",
-
     nome: "Starlight Chamomile Tea",
-
     tipo: "cardapio",
-
     preco: 80,
-
     comprado: false,
-
     descricao: "A relaxing drink added to the possible orders.",
-
     icone: "🍵",
 
     diaLiberacao: 2
@@ -1500,27 +1455,55 @@ function finalizarDia() {
 
 // Chamado quando o jogador clica em "Start Next Day"
 // ==========================================
-// INTEGRAÇÃO COM SDK GAMEDISTRIBUTION
+// INTEGRAÇÃO COM SDK Y8
 // ==========================================
-function chamarAnuncioGD(callbackAoFechar) {
-  // A GameDistribution injeta a variável global 'gamedistribution'
-  if (typeof gamedistribution !== 'undefined' && typeof gamedistribution.showAd === 'function') {
+
+let y8Sdk = null;
+
+// Ouve o evento de carregamento do SDK da Y8
+window.addEventListener("y8sdk.ready", function () {
+  if (typeof y8 !== 'undefined' && y8.sdk) {
+    y8Sdk = y8.sdk();
+    
+    // Configuração inicial do SDK (substitua 'SEU_APP_ID' pelo ID real fornecido pela Y8)
+    let appConfig = { appId: "SEU_APP_ID", autoLogin: true };
+    let adConfig = { 
+      gameId: "SEU_APP_ID", 
+      test: false, // Mude para true se estiver testando localmente/em desenvolvimento
+      preloadAdBreaks: "auto", 
+      sound: "on", 
+      onReady: () => console.log("Anúncios Y8 prontos para exibição") 
+    };
+
+    y8Sdk.init(appConfig, adConfig);
+  }
+});
+
+function chamarAnuncioY8(callbackAoFechar) {
+  if (y8Sdk && typeof y8Sdk.showAd === 'function') {
     definirPausa(true, true);
     if (window.audioManager) window.audioManager.pause();
 
-    // Dispara o anúncio comercial oficial da GD
-    gamedistribution.showAd(gamedistribution.commercial)
-      .then(() => {
-        console.log("Anúncio exibido com sucesso");
+    // Dispara o anúncio interstitial (comercial) da Y8
+    y8Sdk.showAd({
+      type: "start",
+      name: "end-of-day",
+      beforeAd: () => {
+        console.log("Anúncio da Y8 vai começar");
+      },
+      afterAd: () => {
+        console.log("Anúncio da Y8 finalizado");
+      },
+      adBreakDone: (info) => {
         retomarAposAnuncio(callbackAoFechar);
-      })
-      .catch((erro) => {
-        console.log("Anúncio não disponível ou bloqueado:", erro);
-        retomarAposAnuncio(callbackAoFechar);
-      });
+      }
+    }).catch((erro) => {
+      console.log("Erro ao exibir anúncio da Y8 ou indisponível:", erro);
+      retomarAposAnuncio(callbackAoFechar);
+    });
   } else {
-    // Se o SDK não respondeu, segue o jogo normalmente
-    console.log("SDK da GD não encontrado no momento da chamada");
+    // Se o SDK ainda não carregou ou não estiver presente, segue o jogo normalmente
+    console.log("SDK da Y8 não inicializado no momento da chamada");
     callbackAoFechar();
   }
 }
@@ -1532,14 +1515,36 @@ function retomarAposAnuncio(callback) {
 }
 
 // ==========================================
-// AÇÃO DE PRÓXIMO DIA COM ANÚNCIO
+// AÇÃO DE PRÓXIMO DIA COM ANÚNCIO Y8
 // ==========================================
 function avancarProximoDia() {
-  chamarAnuncioGD(() => {
+  chamarAnuncioY8(() => {
     contadorDias++;
     lucrosDia = 0;
     gastosDia = 0;
     diaTerminado = false;
+
+    if (fimdiaOverlayElement) fimdiaOverlayElement.classList.remove('ativo');
+
+    renderizarLojinha();
+    salvarJogo();
+    iniciarDia();
+
+    clienteAtual = null;
+    novoCliente();
+  });
+}
+
+if (btnProximoDia) {
+  btnProximoDia.addEventListener('click', avancarProximoDia);
+}
+
+function retomarAposAnuncio(callback) {
+  definirPausa(false, true);
+  if (window.audioManager) window.audioManager.resume();
+  if (callback) callback();
+}
+
 
     if (fimdiaOverlayElement) fimdiaOverlayElement.classList.remove('ativo');
 
