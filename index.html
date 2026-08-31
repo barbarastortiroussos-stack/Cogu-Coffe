@@ -34,28 +34,15 @@
   <title>Cogu Coffee - Mushroom Village</title>
   <link rel="stylesheet" href="style.css">
 
-  <!-- SDK GameDistribution (Carrega no HEAD com o seu Game ID correto) -->
+  <!-- SDK Y8 -->
   <script type="text/javascript">
-    window["GD_OPTIONS"] = {
-      "gameId": "5a40f6aa8d2c4e959e456f851258987f",
-      "onEvent": function(event) {
-        switch (event.name) {
-          case "SDK_GAME_START":
-            if (window.audioManager) window.audioManager.resume();
-            break;
-          case "SDK_GAME_PAUSE":
-            if (window.audioManager) window.audioManager.pause();
-            break;
-        }
-      },
-    };
     (function(d, s, id) {
         var js, fjs = d.getElementsByTagName(s)[0];
         if (d.getElementById(id)) return;
         js = d.createElement(s); js.id = id;
-        js.src = 'https://html5.api.gamedistribution.com/main.min.js';
+        js.src = "https://cdn.y8.com/api/sdk.js";
         fjs.parentNode.insertBefore(js, fjs);
-    }(document, 'script', 'gamedistribution-jssdk'));
+    }(document, 'script', 'y8sdk'));
   </script>
 </head>
 <body>
