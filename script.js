@@ -1618,7 +1618,7 @@ function iniciarMusica() {
 // Inicia a música no primeiro clique do jogador
 document.addEventListener('click', iniciarMusica, { once: true });
 
-// Gerenciador global de áudio para o SDK da GD controlar
+// Gerenciador global de áudio para o SDK controlar
 window.audioManager = {
   pause: function() {
     if (musica) musica.pause();
